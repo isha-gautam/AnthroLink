@@ -1,0 +1,15 @@
+{
+  "name": "t7",
+  "version": "1.0.0",
+  "description": "Function to add two numbers",
+  "main": "sample.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "AnthroLite"
+  },
+  "author": "isha-gautam",
+  "license": "ISC"
+}
