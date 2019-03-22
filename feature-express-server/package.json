@@ -1,0 +1,14 @@
+{
+  "name": "feature-express-server",
+  "version": "1.0.0",
+  "description": "hello-world app",
+  "main": "hello-world.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "isha-gautam",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
