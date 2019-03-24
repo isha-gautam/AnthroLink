@@ -1,0 +1,14 @@
+{
+  "name": "AnthroLink",
+  "version": "1.0.0",
+  "description": "A project to help citizens dispose off their wastes in a responsible and efficient manner. This app will connect citizens with their nearest NGOs, recycling plants, etc to",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "isha-gautam",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
