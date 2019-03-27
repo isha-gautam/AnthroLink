@@ -1,1 +1,4 @@
 node_modules/
+views/vendor/bootstrap-4.3.1-dist/
+views/vendor/jquery-3.3.1.js
+views/vendor/jquery-3.3.1.min.js
