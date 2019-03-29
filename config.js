@@ -1,7 +1,7 @@
 var fs = require('fs');
 module.exports = {
     https: {
-      key: fs.readFileSync('key.pem'),
+      key: fs.readFileSync('private_key.pem'),
       cert: fs.readFileSync('cert.pem')
     }
 }
