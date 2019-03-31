@@ -9,6 +9,8 @@
   "author": "isha-gautam",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^3.8.0"
   }
 }
