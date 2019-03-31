@@ -1,0 +1,14 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": ".3b58337ac5b7852ca4533f502cdc8d0816c788f3-audit.json",
+    "files": [
+        {
+            "date": 1554041132232,
+            "name": "AnthroLink-192019-03-31-19.log",
+            "hash": "837256f7b91be89460c6f060ced526f4"
+        }
+    ]
+}
