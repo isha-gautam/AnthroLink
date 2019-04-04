@@ -12,6 +12,7 @@ db.createUser(
 );
 
 db.createCollection("users");
+db.createCollection("tickets");
 
 db = conn.getDB("admin");
 
@@ -23,8 +24,3 @@ db.createUser(
         roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
     }
 );
-
-
-
-
-
