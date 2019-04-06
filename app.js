@@ -6,10 +6,10 @@ var Server;
 var http = require('http');
 var https = require('https');
 
-//Read JSON object
-console.log(config);
+// Export config object
+exports.module={config};
 
-//Check https enable or not
+// Check https enable or not
 if (config.hasOwnProperty('https')) {
     var credentials = { key: config.https.key, cert: config.https.cert };
     Server = https.createServer(credentials, app);
@@ -20,8 +20,7 @@ else {
     console.log('App starting with HTTP enabled');
 }
 
-var PORT = process.env.PORT || 4119;
-
+var PORT = process.env.PORT || 8080;
 
 app.get('/', function (req, res) {
     res.send('Hello World');
