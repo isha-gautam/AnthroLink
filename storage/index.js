@@ -16,7 +16,7 @@ module.exports() = {
             storageModule.init(config).then(
                 function (data) {
                     resolve();
-                },
+                }).otherwise(
                 function (error) {
                     reject(error);
                 }

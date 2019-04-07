@@ -7,7 +7,7 @@ module.exports = {
             MongoUtil.connectToServer().then(
                 function () {
                     return resolve();
-                },
+                }).otherwise(
                 function (error) {
                     reject(error);
                 }
