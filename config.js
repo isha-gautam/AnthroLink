@@ -11,8 +11,7 @@ module.exports = {
       host: 'localhost',
       username: 'AnthroAdmin',
       password: 'password',
-      port:     27017,
-      err: 'Wrong url'
+      port:     27017
     }
 
 }

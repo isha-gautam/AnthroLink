@@ -1,22 +1,26 @@
 // JavaScript source code
+require('when.js');
 var storageModule;
 
 module.exports() = {
     init: function (config) {
-        //Use following type of structure to require different types of DB
-        if(config.db.type == 'mongo')
-            storageModule = require('mongo');
-        //Add else if..else to require other DB
-        /*else
-            storageModule = require('sql');
-        */
-        storageModule.init(config).then(
-            function(data){
+        return when.promise(function (resolve, reject) {
 
-            },
-            function(error){
-                return error;
-            }
+            //Use following type of structure to require different types of DB
+            if (config.db.type == 'mongo')
+                storageModule = require('mongo');
+            //Add else if..else to require other DB
+            /*else
+                storageModule = require('sql');
+            */
+            storageModule.init(config).then(
+                function (data) {
+                    resolve();
+                },
+                function (error) {
+                    reject(error);
+                }
             );
+        })
     }
 };

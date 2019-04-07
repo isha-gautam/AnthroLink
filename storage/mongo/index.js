@@ -1,11 +1,10 @@
 var MongoUtil = require('utils.js');
 require('when.js');
 
-module.exports = function (config) {
-    init = function (config) {
+module.exports = {
+    init: function (config) {
         return when.promise(function (resolve, reject) {
-            var promise = MongoUtil.connectToServer();
-            promise.then(
+            MongoUtil.connectToServer().then(
                 function () {
                     return resolve();
                 },
