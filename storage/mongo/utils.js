@@ -1,16 +1,20 @@
-var MongoClient = require( 'mongodb' ).MongoClient;
+var MongoClient = require('mongodb').MongoClient;
 var mydb;
 
-module.exports = function(config){
+module.exports = function (config) {
 
-  init = function ( callback ) {
-    MongoClient.connect( "mongodb://localhost:27017/AnthroLinkDB", function( err, db ) {
+  connectToServer = new Promise(function (resolve, reject) {
+    var url = "mongodb://" + config.host + ":" + config.port + "/" + config.name;
+    MongoClient.connect(url, function (err, db) {
       mydb = db;
-      return callback( err );
-    } );
-  }
+      if (err)
+        reject(err);
+      else
+        return resolve();
+    });
+  }),
 
-  getDb = function() {
-    return mydb;
-  }
+    getDb = function () {
+      return mydb;
+    }
 };

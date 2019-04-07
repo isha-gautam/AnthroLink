@@ -5,9 +5,9 @@ var app = express();
 var Server;
 var http = require('http');
 var https = require('https');
+var storageModule = require('./storage/index.js');
 
-// Export config object
-exports.module={config};
+storageModule.init(config);
 
 // Check https enable or not
 if (config.hasOwnProperty('https')) {

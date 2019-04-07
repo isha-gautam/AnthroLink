@@ -9,10 +9,9 @@ module.exports = {
       type: 'mongo',
       name: 'AnthroLinkDB',
       host: 'localhost',
-      password: 'password',
-      port:     27017,
-      url:      '"mongodb://localhost:27017/AnthroLinkDB',
       username: 'AnthroAdmin',
+      password: 'password',
+      port:     27017
     }
 
 }
