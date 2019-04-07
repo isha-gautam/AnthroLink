@@ -5,7 +5,9 @@ var app = express();
 var Server;
 var http = require('http');
 var https = require('https');
-var storageModule = require('./storage/index.js');
+var storageModule = require('storage');
+
+var PORT = process.env.PORT || 8080;
 
 storageModule.init(config);
 
@@ -19,8 +21,6 @@ else {
     Server = http.createServer(app);
     console.log('App starting with HTTP enabled');
 }
-
-var PORT = process.env.PORT || 8080;
 
 app.get('/', function (req, res) {
     res.send('Hello World');
