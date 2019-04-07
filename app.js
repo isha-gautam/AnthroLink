@@ -5,11 +5,13 @@ var app = express();
 var Server;
 var http = require('http');
 var https = require('https');
+var storageModule = require('storage');
 
-//Read JSON object
-console.log(config);
+var PORT = process.env.PORT || 8080;
 
-//Check https enable or not
+storageModule.init(config);
+
+// Check https enable or not
 if (config.hasOwnProperty('https')) {
     var credentials = { key: config.https.key, cert: config.https.cert };
     Server = https.createServer(credentials, app);
@@ -19,9 +21,6 @@ else {
     Server = http.createServer(app);
     console.log('App starting with HTTP enabled');
 }
-
-var PORT = process.env.PORT || 4119;
-
 
 app.get('/', function (req, res) {
     res.send('Hello World');
