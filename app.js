@@ -25,10 +25,10 @@ else {
     console.log('App starting with HTTP enabled');
 }
 
-fs.readFile("views/html/login.html", function(err, data){
-    if (err) throw err;
-    app.get('/', function (req, response) {
-        response.writeHead(200, {'Content-Type': 'text/html'});
+app.get('/', function (req, response) {
+    fs.readFile("views/html/login.html", function (err, data) {
+        if (err) throw err;
+        response.writeHead(200, { 'Content-Type': 'text/html' });
         response.write(data);
         response.end();
     });
