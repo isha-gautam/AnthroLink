@@ -5,11 +5,14 @@ var app = express();
 var Server;
 var http = require('http');
 var https = require('https');
-var storageModule = require('storage');
+var storageModule = require('./storage');
+var fs = require('fs');
 
 var PORT = process.env.PORT || 8080;
 
-storageModule.init(config);
+app.use(express.static('views'));
+
+//storageModule.init(config);
 
 // Check https enable or not
 if (config.hasOwnProperty('https')) {
@@ -22,10 +25,14 @@ else {
     console.log('App starting with HTTP enabled');
 }
 
-app.get('/', function (req, res) {
-    res.send('Hello World');
+fs.readFile("views/html/login.html", function(err, data){
+    if (err) throw err;
+    app.get('/', function (req, response) {
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.write(data);
+        response.end();
+    });
 });
-
 
 Server.listen(PORT, () => {
     console.log('Listening to port ' + PORT);

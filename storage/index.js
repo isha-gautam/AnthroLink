@@ -1,8 +1,8 @@
 // JavaScript source code
-require('when.js');
+require('when');
 var storageModule;
 
-module.exports() = {
+module.exports = {
     init: function (config) {
         return when.promise(function (resolve, reject) {
 
@@ -17,10 +17,10 @@ module.exports() = {
                 function (data) {
                     resolve();
                 }).otherwise(
-                function (error) {
-                    reject(error);
-                }
-            );
+                    function (error) {
+                        reject(error);
+                    }
+                );
         })
     }
 };
