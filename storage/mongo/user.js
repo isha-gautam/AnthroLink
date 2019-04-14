@@ -18,14 +18,10 @@ module.exports = {
         });
     },
 
-    checkUser: function (Id, provider) {
+    checkUser: function (email, provider) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            var json = {};
-            if (provider == 'google')
-                json["gid"] = Id;
-            else if (provider == "local")
-                json["_id"] = Id;
+            var json = { "email": email, "provider": provider };
             obj = db.collection("users").find(json).toArray(function (err, data) {
                 if (err)
                     return reject(err);

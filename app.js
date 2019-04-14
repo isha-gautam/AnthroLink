@@ -1,5 +1,4 @@
 // JavaScript source code
-const { OAuth2Client } = require('google-auth-library');
 var config = require('./config');
 var express = require('express');
 var app = express();
@@ -15,12 +14,6 @@ var request = require('request');
 const LocalStrategy = require('passport-local').Strategy
 
 var PORT = process.env.PORT || 8080;
-const client = new OAuth2Client('594743792021-tvffn11n961cqea8mbufm9gnts372m0n.apps.googleusercontent.com');
-var authObject;
-var token_id, access_token, refresh_token;
-var profile;
-var profileDB;
-
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -49,72 +42,44 @@ app.get('/', function (req, response) {
         response.end();
     });
 });
-/*
-app.post('/google/login',
-    passport.authenticate('local', { failureRedirect: '/' }),
-    function (req, res) {
 
-        if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('id_token') || !req.body.hasOwnProperty('access_token') || !req.body.hasOwnProperty('profile'))
-            resp.status(404).send({ 'data': { 'msg': 'GoogleAuth does not have sufficient data' } });
-        else {
-            authObject = req.body;
-            token_id = authObject.id_token;
-            access_token = authObject.access_token;
-            profileDB = {
-                'Id': authObject.Id,
-                'name': authObject.name,
-                'userimg': authObject.userimg,
-                'emailID': authObject.emailID
-            };
+app.post('views/html/login', function (req, res) {
+    if (!req.hasOwnProperty('body') || req.body.hasOwnProperty('name'))
+        console.log("error logging in");
 
-            profile = authObject.profile;
-
-            resp.status(200).send({ 'data': { 'token_id': token_id, 'access_id': access_token } });
-
-            async function verify() {
-                const ticket = await client.verifyIdToken({
-                    idToken: token_id,
-                    audience: '594743792021-tvffn11n961cqea8mbufm9gnts372m0n.apps.googleusercontent.com',
+    if (res.body.name == 'login-submit')
+        passport.authenticate('local', {
+            successRedirect: 'views/html/profile',
+            failureRedirect: '/views/html/login',
+            failureFlash: true
+        })
+    else {
+        storageModule.checkUser(email, 'local').then(function (data) {
+            if (Object.key(data).length == 0) {
+                storageModule.createUser(null, req.body.name, req.body.email, req.body.password, null, 'local').then(function (data) {
+                    res.redirect('views/html/profile');
+                }).otherwise(function (err) {
+                    res.redirect('/login');
                 });
-                const payload = ticket.getPayload();
-                const userid = payload['sub'];
             }
-            console.log("Account verified!");
-            verify().catch(console.error);
-            console.log(profileDB);
-
-            // var options = {
-            //     method: 'POST',
-            //     url: 'https://localhost:8080/oauth/token',
-            //     headers: { 'content-type': 'application/json' },
-            //     body:
-            //     {
-            //         grant_type: 'authorization_code',
-            //         client_id: '594743792021-tvffn11n961cqea8mbufm9gnts372m0n.apps.googleusercontent.com',
-            //         client_secret: '8aant_BOs6holQms7d8PM_wN',
-            //         redirect_uri: 'https://localhost:8080'
-            //     },
-            //     json: true
-            // };
-
-            // request(options, function (error, response, body) {
-            //     if (error) throw new Error(error);
-            //     console.log(response);
-            //     refresh_token = body.refresh_token;
-            //     if (response.hasOwnProperty('body'))
-            //         console.log(response.body);
-            //     else
-            //         console.log('bye');
-            //       console.log(response);
-            // });
-        }
-
-        res.redirect('/');
-
+        }).otherwise(function (err) {
+            done(err, null);
+        });
     }
+});
 
-);
-*/
+passport.use(new LocalStrategy(
+    function (email, password, done) {
+        if (!email || !password)
+            return done({ 'err': { "msg": "Incomplete data", "code": "" } }, null);
+        storageModule.checkUser(email, 'local').then(function (data) {
+            if (Object.key(data).length == 0)
+                done(null, data);
+        }).otherwise(function (err) {
+            done(err, null);
+        });
+    }
+));
 
 passport.serializeUser(function (user, cb) {
     cb(null, user);
@@ -124,12 +89,10 @@ passport.deserializeUser(function (obj, cb) {
     cb(null, obj);
 });
 
-app.get('/auth/google',
-    passport.authenticate('google', {
-        scope:
-            ['email', 'profile']
-    }
-    ));
+app.get('/auth/google', passport.authenticate('google', {
+    scope: ['email', 'profile']
+}
+));
 
 passport.use(new GoogleStrategy({
     clientID: "594743792021-tvffn11n961cqea8mbufm9gnts372m0n.apps.googleusercontent.com",
@@ -142,7 +105,6 @@ passport.use(new GoogleStrategy({
             !profile.hasOwnProperty("displayName") || !profile.hasOwnProperty("emails") ||
             !profile.hasOwnProperty("photos") || !profile.hasOwnProperty("provider"))
             return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } }, null);
-
         var photo = null;
         if (profile.photos.length > 0)
             photo = profile.photos[0].value;

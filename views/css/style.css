@@ -29,6 +29,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 0;
 }
 
 #customBtn,#customBtn2 {
@@ -58,3 +59,44 @@
     width: 191px;
     height: 46px;
   }
+
+  .btn-login {
+    background-color: #4885ed;
+    outline: none;
+    color: #fff;
+    font-size: 14px;
+    height: auto;
+    font-weight: normal;
+    padding: 14px 0;
+    text-transform: uppercase;
+    border-color: #59B2E6;
+  }
+  
+  .btn-login:hover,
+  
+  .btn-login:focus {
+    color: #fff;
+    background-color:#4885ed;
+    border-color: #4885ed;
+  }
+  
+  .btn-register {
+    background-color: #4885ed;
+    outline: none;
+    color: #fff;
+    font-size: 14px;
+    height: auto;
+    font-weight: normal;
+    padding: 14px 0;
+    text-transform: uppercase;
+    border-color: #4885ed;
+  }
+  
+  .btn-register:hover,
+  
+  .btn-register:focus {
+    color: #fff;
+    background-color: #4885ed;
+    border-color: #4885ed;
+  }
+  

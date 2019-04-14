@@ -6,7 +6,7 @@ module.exports = {
     init: MongoUtil.connectToServer,
     createUser: function (Id, name, email, pwd, imgURL, provider) {
         return when.promise(function (resolve, reject) {
-            user.checkUser(Id, provider).then(function (data) {
+            user.checkUser(email, provider).then(function (data) {
                 if (Object.keys(data).length == 0) {
                     user.createUser(Id, name, email, pwd, imgURL, provider).then(function (data) {
                         return resolve(data);
