@@ -52,7 +52,7 @@
     justify-content: center;
   }
 
-  span.icon {
+  .icon {
     background-image: url('../img/btn_google_signin_dark_focus_web.png');
     vertical-align: middle;
     width: 191px;

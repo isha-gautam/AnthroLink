@@ -11,7 +11,7 @@ module.exports = {
       host: 'localhost',
       username: 'AnthroAdmin',
       password: 'password',
-      port:     27017
+      port:     '27017'
     }
 
 }

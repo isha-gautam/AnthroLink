@@ -11,7 +11,6 @@
     <script src="../vendor/jquery-3.3.1.min.js"></script>
     <script src="../vendor/popper.min.js"></script>
     <script src="../vendor/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-    <script src="../js/glogin.js"></script>
     <script src="https://apis.google.com/js/api:client.js"></script>
 </head>
 
@@ -41,23 +40,22 @@
                 <h5> Connect via Google Account</h5><br>
                 <div id="gSignInWrapper">
                     <div id="customBtn" class="customGPlusSignIn">
-                        <span class="icon"></span>
+                        <a class="icon" href="/auth/google"></a>
                     </div>
                 </div>
                 <div id="name"></div>
-                <script>startApp(document.getElementById("customBtn"), document.getElementById("name"));</script>
             </div>
             <div id="organisation" class="container tab-pane fade" role="tabpanel" aria-labelledby="organisation"><br>
                 <h5> Connect via Google Account</h5><br>
                 <div id="gSignInWrapper2">
                     <div id="customBtn2" class="customGPlusSignIn">
-                        <span class="icon"></span>
+                        <a class="icon" href="/auth/google"></a>
                     </div>
                 </div>
                 <div id="name2"></div>
-                <script>startApp(document.getElementById("customBtn2"), document.getElementById("name2"));</script>
             </div>
         </div>
     </div>
 </body>
+
 </html>
