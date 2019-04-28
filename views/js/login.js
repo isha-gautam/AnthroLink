@@ -9,7 +9,7 @@ function validatePassword() {
     }
     if (!regularExpression.test(password)) {
         document.getElementById('message1').style.color = 'red';
-        document.getElementById('message1').innerHTML += "password should contain atleast one number and one special character";
+        document.getElementById('message1').innerHTML += "<br>"+"\npassword should contain atleast one number and one special character";
     }
 }
 
