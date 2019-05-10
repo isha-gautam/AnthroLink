@@ -25,9 +25,35 @@ module.exports = {
             obj = db.collection("users").find(json).toArray(function (err, data) {
                 if (err)
                     return reject(err);
-                if (Object.keys(data).length == 0) {
+                if (Object.keys(data).length == 0)
                     return resolve({});
-                }
+                return resolve(data);
+            });
+        })
+    },
+
+    updateUser: function (updated) {
+        return when.promise(function (resolve, reject) {
+            var db = util.getDb();
+            db.collection("customers").updateOne({ email: updated.email }, updated, function (err, data) {
+                if (err)
+                    return reject(err);
+                if (Object.keys(data).length == 0)
+                    return resolve({});
+                return resolve(data);
+            });
+        })
+    },
+
+    findOrg: function (location) {
+        return when.promise(function (resolve, reject) {
+            var db = util.getDb();
+            var json = { "type": "Organisation", "address":  "/(location)/i"};
+            obj = db.collection("users").find(json).toArray(function (err, data) {
+                if (err)
+                    return reject(err);
+                if (Object.keys(data).length == 0)
+                    return resolve({});
                 return resolve(data);
             });
         })

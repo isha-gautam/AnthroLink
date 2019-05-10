@@ -1,8 +1,8 @@
-
 function init() {
     var currUser;
     $.ajax({
         url: 'http://localhost:8080/',
+        type: 'GET',
         dataType: 'application/json',
         complete: function (data) {
             alert(data)
@@ -39,14 +39,11 @@ function init() {
 
     document.addEventListener("DOMContentLoaded", function () {
         var form = document.getElementById("edit-profile");
-        var output = document.getElementById("output");
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-            var json = toJSONString(this);
-            // output.innerHTML = json;
-
+            var updatedUser = toJSONString(this);
+            //add code to update user in db
         }, false);
-
     });
 
 })();

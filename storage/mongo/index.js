@@ -19,5 +19,11 @@ module.exports = {
                 return reject(err);
             });
         })
+    },
+    updateUser: function (...args) {
+        return storageModule.createUser(...args);
+    },
+    findOrg: function (...args) {
+        return storageModule.findOrg(...args);
     }
 };

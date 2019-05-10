@@ -22,5 +22,11 @@ module.exports = {
     },
     createUser: function (...args) {
         return storageModule.createUser(...args);
+    },
+    updateUser: function (...args) {
+        return storageModule.createUser(...args);
+    },
+    findOrg: function (...args) {
+        return storageModule.findOrg(...args);
     }
 };
