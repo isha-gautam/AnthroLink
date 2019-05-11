@@ -6,10 +6,9 @@ var Server;
 var http = require('http');
 var https = require('https');
 var storageModule = require('./storage');
-var fs = require('fs');
 var bodyParser = require('body-parser');
 var passport = require('passport');
-var currUser;
+var IP, mode;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 var PORT = process.env.PORT || 8080;
@@ -19,10 +18,12 @@ if (config.hasOwnProperty('https')) {
     var credentials = { key: config.https.key, cert: config.https.cert };
     Server = https.createServer(credentials, app);
     console.log('App starting with HTTPS enabled');
+    mode = "https";
 }
 else if (config.hasOwnProperty('http')) {
     Server = http.createServer(app);
     console.log('App starting with HTTP enabled');
+    mode = "http";
 }
 else
     return process.exit(1);
@@ -31,6 +32,11 @@ if (!config.hasOwnProperty('GoogleApi') || !config.GoogleApi.hasOwnProperty('cli
     console.log('Incomplete information');
     return process.exit(1);
 }
+
+if (config.hasOwnProperty('IP'))
+    IP = config.IP;
+else
+    IP = '127.0.0.1';
 
 if (!storageModule.init(config)) {
     console.log('Cannot connect to DB');
@@ -44,18 +50,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function (req, res) {
-    fs.readFile("views/html/login.html", function (err, data) {
-        if (err) throw err;
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.write(data);
-        res.end();
-    });
+    res.sendFile(__dirname + "/views/html/" + "login.html");
 });
 
 passport.use(new GoogleStrategy({
     clientID: config.GoogleApi.client_Id,
     clientSecret: config.GoogleApi.client_Secret,
-    callbackURL: "https://127.0.0.1:8080/auth/google/callback"
+    callbackURL: mode + "://" + IP + ':' + PORT + "/auth/google/callback"
 },
     function (accessToken, refreshToken, profile, done) {
         if (!accessToken || !profile || !profile.hasOwnProperty("id") ||
@@ -85,10 +86,8 @@ passport.use(new LocalStrategy({
     storageModule.checkUser(email, 'local').then(function (data) {
         if (Object.key(data).length == 0)
             done({ 'err': { "msg": "This user does not exist", "code": "" } }, null);
-        else {
-            currUser = data;
+        else
             done(null, data);
-        }
     }).otherwise(function (err) {
         done(err, null);
     });
@@ -110,7 +109,6 @@ app.get('/auth/google', passport.authenticate('google', {
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/error' }),
     function (req, res) {
-        currUser = req.body;
         res.redirect('/dashboard');
     }
 );
@@ -133,7 +131,6 @@ app.post('/login', function (req, res) {
         storageModule.checkUser(email, 'local').then(function (data) {
             if (Object.key(data).length == 0) {
                 storageModule.createUser(null, req.body.name, req.body.email, req.body.password, null, 'local').then(function (data) {
-                    currUser = data;
                     res.redirect('/dashboard');
                 }).otherwise(function (err) {
                     res.redirect('/login');
@@ -143,6 +140,10 @@ app.post('/login', function (req, res) {
             done(err, null);
         });
     }
+});
+
+app.get('/dashboard', function (req, res) {
+    res.sendFile(__dirname + "/views/html/" + "dashboard.html");
 });
 
 app.get('/search', function (req, res) {
@@ -183,6 +184,6 @@ app.get('/error', function (req, res) {
     res.redirect('/login');
 });
 
-Server.listen(PORT, () => {
+Server.listen(PORT, IP, () => {
     console.log('Listening to port ' + PORT);
 });
