@@ -8,10 +8,10 @@ var https = require('https');
 var storageModule = require('./storage');
 var bodyParser = require('body-parser');
 var passport = require('passport');
-var IP, mode;
+var session = require('express-session');
+var IP, mode, PORT;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
-var PORT = process.env.PORT || 8080;
 
 // Check https enable or not
 if (config.hasOwnProperty('https')) {
@@ -33,10 +33,8 @@ if (!config.hasOwnProperty('GoogleApi') || !config.GoogleApi.hasOwnProperty('cli
     return process.exit(1);
 }
 
-if (config.hasOwnProperty('IP'))
-    IP = config.IP;
-else
-    IP = '127.0.0.1';
+IP = config.hasOwnProperty('IP') ? config.IP : '127.0.0.1';
+PORT = config.hasOwnProperty('PORT') ? config.PORT : (process.env.PORT || 8080);
 
 if (!storageModule.init(config)) {
     console.log('Cannot connect to DB');
@@ -46,6 +44,7 @@ if (!storageModule.init(config)) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('views'));
+app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -183,6 +182,8 @@ app.get('/logout', function (req, res) {
 app.get('/error', function (req, res) {
     res.redirect('/login');
 });
+
+console.log(PORT + "\n" + IP);
 
 Server.listen(PORT, IP, () => {
     console.log('Listening to port ' + PORT);
