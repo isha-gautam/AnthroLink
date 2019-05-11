@@ -10,10 +10,8 @@ var fs = require('fs');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var currUser;
-// var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-// var request = require('request');
-const LocalStrategy = require('passport-local').Strategy
-var path = require('path');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 var PORT = process.env.PORT || 8080;
 
 // Check https enable or not
@@ -29,15 +27,15 @@ else if (config.hasOwnProperty('http')) {
 else
     return process.exit(1);
 
-// if (!config.hasOwnProperty('GoogleApi') || config.GoogleApi.hasOwnProperty('client_Id') || config.GoogleApi.hasOwnProperty('client_Secret')) {
-//     console.log('Incomplete information');
-//     return process.exit(1);
-// }
+if (!config.hasOwnProperty('GoogleApi') || !config.GoogleApi.hasOwnProperty('client_Id') || !config.GoogleApi.hasOwnProperty('client_Secret')) {
+    console.log('Incomplete information');
+    return process.exit(1);
+}
 
-// if (!storageModule.init(config)) {
-//     console.log('Cannot connect to DB');
-//     return process.exit(1);
-// }
+if (!storageModule.init(config)) {
+    console.log('Cannot connect to DB');
+    return process.exit(1);
+}
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -45,16 +43,38 @@ app.use(express.static('views'));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.set('views', path.join(__dirname, '/views/html'));
-
 app.get('/', function (req, res) {
-    fs.readFile("views/html/dashboard.html", function (err, data) {
+    fs.readFile("views/html/login.html", function (err, data) {
         if (err) throw err;
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.write(data);
         res.end();
     });
 });
+
+passport.use(new GoogleStrategy({
+    clientID: config.GoogleApi.client_Id,
+    clientSecret: config.GoogleApi.client_Secret,
+    callbackURL: "https://127.0.0.1:8080/auth/google/callback"
+},
+    function (accessToken, refreshToken, profile, done) {
+        if (!accessToken || !profile || !profile.hasOwnProperty("id") ||
+            !profile.hasOwnProperty("displayName") || !profile.hasOwnProperty("emails") ||
+            !profile.hasOwnProperty("photos") || !profile.hasOwnProperty("provider"))
+            return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } }, null);
+        var photo = null;
+        if (profile.photos.length > 0)
+            photo = profile.photos[0].value;
+        var email = null;
+        if (profile.emails.length > 0)
+            email = profile.emails[0].value;
+        storageModule.createUser(profile.id, profile.displayName, email, null, photo, profile.provider).then(function (data) {
+            done(null, data);
+        }).otherwise(function (err) {
+            done(err, null);
+        });
+    }
+));
 
 passport.use(new LocalStrategy({
     usernameField: 'email',
