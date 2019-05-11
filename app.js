@@ -44,7 +44,7 @@ if (!storageModule.init(config)) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('views'));
-app.use(session);
+app.use(session({ secret: 'AnthroLink_kniLorhtnA' }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -182,8 +182,6 @@ app.get('/logout', function (req, res) {
 app.get('/error', function (req, res) {
     res.redirect('/login');
 });
-
-console.log(PORT + "\n" + IP);
 
 Server.listen(PORT, IP, () => {
     console.log('Listening to port ' + PORT);
