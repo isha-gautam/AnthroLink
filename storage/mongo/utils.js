@@ -1,27 +1,28 @@
 var MongoClient = require('mongodb').MongoClient;
-require('when.js');
+var when = require('when');
 
 var mydb;
 
 module.exports = {
   connectToServer: function (config) {
     return when.promise(function (resolve, reject) {
-      if (!config.host || !config.port || !config.name) {
+      if (!config.db.host || !config.db.port || !config.db.name) {
         var err = "Wrong URL of DB";
         reject(err);
       }
-      var url = "mongodb://" + config.host + ":" + config.port + "/" + config.name;
-      MongoClient.connect(url, function (err, db) {
-        mydb = db;
+      var url = 'mongodb://' + config.db.host + ':' + config.db.port;
+      MongoClient.connect(url, function (err, client) {
         if (err)
-          reject(err);
-        else
+          return reject(err);
+        else {
+          mydb = client.db('AnthroLinkDB');
           return resolve();
+        }
       });
     })
   },
 
-  getDb = function () {
+  getDb: function () {
     return mydb;
   }
 };

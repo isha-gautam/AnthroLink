@@ -1,7 +1,5 @@
 node_modules/
-
-
 logs/
-
 data/
 credentials.json
+.vscode/

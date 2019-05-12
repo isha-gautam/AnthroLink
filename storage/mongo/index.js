@@ -1,17 +1,29 @@
-var MongoUtil = require('utils.js');
-require('when.js');
+var MongoUtil = require('./utils');
+var when = require('when');
+var user = require('./user');
 
 module.exports = {
-    init: function (config) {
+    init: MongoUtil.connectToServer,
+    createUser: function (Id, name, email, pwd, imgURL, provider) {
         return when.promise(function (resolve, reject) {
-            MongoUtil.connectToServer().then(
-                function () {
-                    return resolve();
-                }).otherwise(
-                function (error) {
-                    reject(error);
+            user.checkUser(email, provider).then(function (data) {
+                if (Object.keys(data).length == 0) {
+                    user.createUser(Id, name, email, pwd, imgURL, provider).then(function (data) {
+                        return resolve(data);
+                    }).otherwise(function (err) {
+                        return reject(err);
+                    })
                 }
-            );
+                return resolve(data);
+            }).otherwise(function (err) {
+                return reject(err);
+            });
         })
+    },
+    updateUser: function (...args) {
+        return storageModule.createUser(...args);
+    },
+    findOrg: function (...args) {
+        return storageModule.findOrg(...args);
     }
 };
