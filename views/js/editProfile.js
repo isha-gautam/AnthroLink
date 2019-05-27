@@ -1,14 +1,14 @@
 function init() {
     var currUser;
     $.ajax({
-        url: 'http://localhost:8080/',
+        url: 'https://localhost:8080/getCurrUser',
         type: 'GET',
-        dataType: 'application/json',
+        dataType: 'json',
         complete: function (data) {
             alert(data)
         },
         success: function (data) {
-            currUser = JSON.parse(data);
+            currUser = data;
             document.getElementById('img').src = currUser.img;
             document.getElementById('name').value = currUser.name;
             document.getElementById('email').value = currUser.email;
@@ -17,6 +17,8 @@ function init() {
                 document.getElementById('phone').value = currUser.phone;
             if (!currUser.hasOwnProperty('address'))
                 document.getElementById('address').value = currUser.address;
+        }, error: function (xhr) {
+            alert("An error occured: " + xhr.status + " " + xhr.statusText);
         }
     })
 }

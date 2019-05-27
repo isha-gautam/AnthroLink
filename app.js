@@ -41,7 +41,7 @@ if (!storageModule.init(config)) {
     return process.exit(1);
 }
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('views'));
 app.use(session({ secret: 'AnthroLink_kniLorhtnA' }));
@@ -49,7 +49,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "login.html");
+    res.redirect('/login');
+    // res.sendFile(__dirname + "/views/html/" + "orgProfile.html");
 });
 
 passport.use(new GoogleStrategy({
@@ -77,21 +78,23 @@ passport.use(new GoogleStrategy({
 ));
 
 passport.use(new LocalStrategy({
+    passReqToCallBack: true,
     usernameField: 'email',
     passwordField: 'password'
 }, function (email, password, done) {
     if (!email || !password)
         return done({ 'err': { "msg": "Incomplete data", "code": "" } }, null);
     storageModule.checkUser(email, 'local').then(function (data) {
-        if (Object.key(data).length == 0)
-            done({ 'err': { "msg": "This user does not exist", "code": "" } }, null);
+        if (Object.keys(data).length == 0) {
+            console.log("user doesnt' exist");
+            done({ 'err': { "msg": "This user does not exist", "code": "" } });
+        }
         else
             done(null, data);
     }).otherwise(function (err) {
         done(err, null);
     });
-}
-));
+}));
 
 passport.serializeUser(function (user, cb) {
     cb(null, user);
@@ -113,75 +116,122 @@ app.get('/auth/google/callback',
 );
 
 app.get('/login', function (req, res) {
-    res.redirect('/');
+    res.sendFile(__dirname + "/views/html/" + "login.html");
 });
 
-app.post('/login', function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('name'))
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/error',
+    failureFlash: true
+}));
+
+app.post('/register', function (req, res) {
+    if (!req.hasOwnProperty('body'))
         console.log("error logging in");
+    else
+        Reqbody = JSON.parse(JSON.stringify(req.body));
 
-    if (req.body.name == 'login-submit')
-        passport.authenticate('local', {
-            successRedirect: '/dashboard',
-            failureRedirect: '/error',
-            failureFlash: true
-        })
-    else {
-        storageModule.checkUser(email, 'local').then(function (data) {
-            if (Object.key(data).length == 0) {
-                storageModule.createUser(null, req.body.name, req.body.email, req.body.password, null, 'local').then(function (data) {
-                    res.redirect('/dashboard');
-                }).otherwise(function (err) {
-                    res.redirect('/login');
-                });
-            }
-        }).otherwise(function (err) {
-            done(err, null);
-        });
-    }
+    storageModule.checkUser(Reqbody.email, 'local').then(function (data) {
+        if (Object.keys(data).length == 0) {
+            storageModule.createUser(null, Reqbody.name, Reqbody.email, Reqbody.password, null, 'local').then(function (data) {
+                res.redirect('/dashboard');
+            }).otherwise(function (err) {
+                res.redirect('/login');
+            });
+        }
+        else {
+            console.log('user already exists');
+            res.redirect('/login');
+        }
+    }).otherwise(function (err) {
+        console.log("error finding user in db");
+        res.redirect('/login');
+    });
 });
 
-app.get('/dashboard', function (req, res) {
+app.get('/dashboard', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "dashboard.html");
 });
 
-app.get('/search', function (req, res) {
+app.get('/search', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "search.html");
 });
 
-app.post('/search', function (req, res) {
+app.post('/search', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('search'))
         console.log("error getting data");
-    storageModule.findOrg(req.body.search.location).then(function (data) {
+    storageModule.searchUser(req.body.search.location).then(function (data) {
         res.send(data);
     }).otherwise(function (err) {
         res.send("No search results");
     })
+});
+
+app.post('/otherProfile', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('submit'))
+        console.log("error getting data");
+    res.redirect('/ticket');
 })
 
-app.get('/editProfile', function (req, res) {
+app.get('/ticket', isAuthenticated, function (req, res) {
+    res.sendFile(__dirname + "/views/html/" + "ticket.html");
+});
+
+app.get('/editProfile', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "editProfile.html");
 });
 
-app.post('/editProfile', function (req, res) {
+app.post('/editProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('name'))
         console.log("error getting data");
     storageModule.updateUser(json.stringify(req.body)).then(function (data) {
         console.log("Succesfully edited!")
     }).otherwise(function (err) {
-        console.log("Error updating! Please try again later!")
+        console.log("Error updating! Please try again later!");
     });
     res.redirect('/search');
-})
+});
 
-app.get('/logout', function (req, res) {
+app.get('/getCurrUser', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('user'))
+        console.log("error logging in");
+    else {
+        Reqbody = JSON.parse(JSON.stringify(req.user[0]));
+        // var send;
+        // storageModule.checkUser(Reqbody.email, Reqbody.provider).then(function (data) {
+        //     if (Object.keys(data).length == 0)
+        //         send = { "msg": "cant find user" };
+        //     else
+        //         send = data;
+        // }).otherwise(function (err) {
+        //     send = err;
+        // });
+        // console.log(send);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(Reqbody));
+    }
+
+});
+
+app.get('/logout', isAuthenticated, function (req, res) {
     req.logout();
-    res.redirect('/login');
+    req.session.destroy(function (err) {
+        console.log("logged out successfully")
+        res.redirect('/');
+    });
 });
 
 app.get('/error', function (req, res) {
+    console.log('error');
     res.redirect('/login');
 });
+
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated() || req.hasOwnProperty('user'))
+        return next();
+    console.log("Not logged in");
+    res.redirect('/');
+};
 
 Server.listen(PORT, IP, () => {
     console.log('Listening to port ' + PORT);

@@ -35,7 +35,7 @@ module.exports = {
     updateUser: function (updated) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            db.collection("customers").updateOne({ email: updated.email }, updated, function (err, data) {
+            db.collection("customers").updateOne({ _id: updated._id }, updated, function (err, data) {
                 if (err)
                     return reject(err);
                 if (Object.keys(data).length == 0)
@@ -45,10 +45,10 @@ module.exports = {
         })
     },
 
-    findOrg: function (location) {
+    searchUser: function (location) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            var json = { "type": "Organisation", "address":  "/(location)/i"};
+            var json = { "address":  "/(location)/i"};
             obj = db.collection("users").find(json).toArray(function (err, data) {
                 if (err)
                     return reject(err);

@@ -41,56 +41,46 @@
         </div>
     </nav>
     <div class="container">
-        <form id="edit-profile" method="post" action="../../app.js" class="form-horizontal" role="form"></form>
+        <h1>Edit Profile</h1>
+        <hr>
         <div class="row col-lg-12">
             <div class="col-lg-3">
                 <div class="text-center">
                     <img id="img" class="avatar img-circle" alt="avatar">
-                    <h6>Upload a different photo...</h6>
-                    <input type="file" class="form-control">
                 </div>
             </div>
             <div class="col-lg-9 profile">
-                <h3>Edit Profile</h3>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Name:</label>
-                    <div class="col-lg-8">
-                        <input id="name" class="form-control" type="text">
+                <h3>Profile</h3>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Name:</label>
+                        <div class="col-lg-8">
+                            <input id="name" class="form-control" type="text" readonly>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Email:</label>
-                    <div class="col-lg-8">
-                        <input id="email" class="form-control" type="email" readonly>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Email:</label>
+                        <div class="col-lg-8">
+                            <input id="email" class="form-control" type="email" readonly>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Type:</label>
-                    <div class="col-lg-8">
-                        <input id="type" class="form-control" type="text" readonly>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Type:</label>
+                        <div class="col-lg-8">
+                            <input id="type" class="form-control" type="text" readonly>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Address:</label>
-                    <div class="col-lg-8">
-                        <input id="address" class="form-control" type="text">
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Address:</label>
+                        <div class="col-lg-8">
+                            <input id="address" class="form-control" type="text" readonly>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label">Phone No:</label>
-                    <div class="col-lg-8">
-                        <input id="phone" class="form-control" type="tel" pattern="[0-9]{10}">
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">Phone No:</label>
+                        <div class="col-lg-8">
+                            <input id="phone" class="form-control" type="tel" pattern="[0-9]{10}" readonly>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-lg-3 control-label"></label>
-                    <div class="col-lg-8">
-                        <input type="submit" class="btn btn-primary" value="Save Changes">
-                        <span></span>
-                        <input type="reset" class="btn btn-default" value="Cancel">
-                    </div>
-                </div>
-                </form>
             </div>
         </div>
     </div>
