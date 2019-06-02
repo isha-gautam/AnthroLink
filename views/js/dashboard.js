@@ -1,20 +1,20 @@
 function init() {
-    var currUser;
     $.ajax({
-        url: 'https://localhost:8080/getCurrUser',
+        url: '/getCurrUser',
         type: 'GET',
         dataType: 'json',
         xhrFields: {
             withCredentials: true
         },
-        complete: function (data) {
-            alert(data)
-        },
         success: function (data) {
-            currUser = data;
-            document.getElementById('img').src = currUser.img;
-            document.getElementById('name').value = currUser.name;
-            document.getElementById('email').value = currUser.email;
+            if (!data)
+                alert("Cannot get current user details. Please try to login again.")
+            else {
+                console.log(data);
+                document.getElementById('img').src = data.img;
+                document.getElementById('name').innerText = data.name;
+                document.getElementById('email').innerText = data._id;
+            }
         }, error: function (xhr) {
             alert("An error occured: " + xhr.status + " " + xhr.statusText);
         }

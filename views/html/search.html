@@ -40,27 +40,34 @@
         </div>
     </nav>
     <div id="dashboard" class="banner">
-        <div class="overlay"></div>
-        <div class="banner-content">
-            <div class="container">
-                <div class="col-sm-12">
-                    <form id="search" method="post" action="../../app.js" class="card card-sm" role="form">
-                        <div class="card-body row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-search h4 text-body"></i>
-                            </div>
-                            <div class="col">
-                                <input name="location" id="location"
-                                    class="form-control form-control-lg form-control-borderless" type="search"
-                                    placeholder="Search by location">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-lg btn-success" type="submit">Search</button>
-                            </div>
-                    </form>
+        <div class="overlay">
+            <div class="banner-content">
+                <div class="container">
+                    <div class="col-sm-12">
+                        <form id="search" method="post" action="/search" class="card card-sm" role="form">
+                            <div class="card-body row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-search h4 text-body"></i>
+                                </div>
+                                <div class="col">
+                                    <input name="searchStr" id="searchStr"
+                                        class="form-control form-control-lg form-control-borderless" type="search"
+                                        placeholder="Search by location, keywords, name, etc">
+                                </div>
+                                <div class="col-auto">
+                                    <button id="submit" class="btn btn-lg btn-success" type="submit">Search</button>
+                                </div>
+                        </form>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p id="results">
+
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </body>

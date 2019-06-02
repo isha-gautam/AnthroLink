@@ -26,10 +26,10 @@ module.exports = {
         })
     },
 
-    searchTicket: function (id) {
+    searchTicket: function (uid) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            obj = db.collection("tickets").find({ _id: "id" }).toArray(function (err, data) {
+            obj = db.collection("tickets").find({ _id: uid }).toArray(function (err, data) {
                 if (err)
                     return reject(err);
                 if (Object.keys(data).length == 0)

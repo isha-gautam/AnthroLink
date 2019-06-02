@@ -5,11 +5,11 @@ var ticket = require('./ticket');
 
 module.exports = {
     init: MongoUtil.connectToServer,
-    createUser: function (Id, name, email, pwd, imgURL, provider) {
+    createUser: function (email, name, pwd, imgURL, provider, type) {
         return when.promise(function (resolve, reject) {
-            user.checkUser(email, provider).then(function (data) {
-                if (Object.keys(data).length == 0) {
-                    user.createUser(Id, name, email, pwd, imgURL, provider).then(function (data) {
+            user.checkUser(email).then(function (data) {
+                if (!data || Object.keys(data).length == 0) {
+                    user.createUser(email, name, pwd, imgURL, provider, type).then(function (data) {
                         return resolve(data);
                     }).otherwise(function (err) {
                         return reject(err);
@@ -27,12 +27,12 @@ module.exports = {
     updateUser: function (...args) {
         return user.updateUser(...args);
     },
-    searchUser: function (...args) {
-        return user.searchUser(...args);
+    fetchUser: function (...args) {
+        return user.fetchUser(...args);
     },
     createFirstTicket: function (user, descr, raised) {
         return when.promise(function (resolve, reject) {
-            user.checkUser(user.email, email.provider).then(function (data) {
+            user.checkUser(user.email).then(function (data) {
                 if (Object.keys(data).length == 0)
                     return resolve({});
                 ticket.createFirstTicket(descr, raised).then(function (data) {
@@ -46,15 +46,15 @@ module.exports = {
             })
         })
     },
-    addNewOrgToTicket: function (id, raised) {
+    addNewOrgToTicket: function (uid, raised) {
         return when.promise(function (resolve, reject) {
-            ticket.searchTicket(id).then(function (data) {
-                if (Object.keys(data).length != 0) {
-                    ticket.addNewOrgToTicket(raised).then(function (Data) {
+            ticket.searchTicket(uid).then(function (tick) {
+                if (Object.keys(tick).length != 0) {
+                    ticket.addNewOrgToTicket(tick, raised).then(function (data) {
                         return resolve(data);
                     }).otherwise(function (err) {
                         return reject(err);
-                    })
+                    });
                 }
                 return resolve(data);
             }).otherwise(function (err) {

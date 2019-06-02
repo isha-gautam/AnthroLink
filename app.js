@@ -41,7 +41,7 @@ if (!storageModule.init(config)) {
     return process.exit(1);
 }
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('views'));
 app.use(session({ secret: 'AnthroLink_kniLorhtnA' }));
@@ -50,7 +50,6 @@ app.use(passport.session());
 
 app.get('/', function (req, res) {
     res.redirect('/login');
-    // res.sendFile(__dirname + "/views/html/" + "orgProfile.html");
 });
 
 passport.use(new GoogleStrategy({
@@ -62,17 +61,21 @@ passport.use(new GoogleStrategy({
         if (!accessToken || !profile || !profile.hasOwnProperty("id") ||
             !profile.hasOwnProperty("displayName") || !profile.hasOwnProperty("emails") ||
             !profile.hasOwnProperty("photos") || !profile.hasOwnProperty("provider"))
-            return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } }, null);
+            return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } });
         var photo = null;
         if (profile.photos.length > 0)
             photo = profile.photos[0].value;
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        storageModule.createUser(profile.id, profile.displayName, email, null, photo, profile.provider).then(function (data) {
+        do {
+            var type = prompt("Please enter your type", "Citizen/Organisation");
+        } while (type.toUpperCase() != "CITIZEN" && type.toUpperCase() != "ORGANISATION");
+        type = type.charAt(0) + type.substr(1).toLowerCase();
+        storageModule.createUser(profile.email, profile.displayName, type, photo, profile.provider).then(function (data) {
             done(null, data);
         }).otherwise(function (err) {
-            done(err, null);
+            done(err);
         });
     }
 ));
@@ -83,25 +86,25 @@ passport.use(new LocalStrategy({
     passwordField: 'password'
 }, function (email, password, done) {
     if (!email || !password)
-        return done({ 'err': { "msg": "Incomplete data", "code": "" } }, null);
-    storageModule.checkUser(email, 'local').then(function (data) {
-        if (Object.keys(data).length == 0) {
+        return done({ 'err': { "msg": "Incomplete data", "code": "" } });
+    storageModule.checkUser(email, password).then(function (data) {
+        if (!data || Object.keys(data).length == 0) {
             console.log("user doesnt' exist");
-            done({ 'err': { "msg": "This user does not exist", "code": "" } });
+            done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
         }
         else
             done(null, data);
     }).otherwise(function (err) {
-        done(err, null);
+        done(err);
     });
 }));
 
-passport.serializeUser(function (user, cb) {
-    cb(null, user);
+passport.serializeUser(function (user, done) {
+    done(null, user);
 });
 
-passport.deserializeUser(function (obj, cb) {
-    cb(null, obj);
+passport.deserializeUser(function (user, done) {
+    done(null, user);
 });
 
 app.get('/auth/google', passport.authenticate('google', {
@@ -121,32 +124,22 @@ app.get('/login', function (req, res) {
 
 app.post('/login', passport.authenticate('local', {
     successRedirect: '/dashboard',
-    failureRedirect: '/error',
-    failureFlash: true
+    failureRedirect: '/error'
 }));
 
 app.post('/register', function (req, res) {
+    var ReqBody;
     if (!req.hasOwnProperty('body'))
-        console.log("error logging in");
-    else
-        Reqbody = JSON.parse(JSON.stringify(req.body));
-
-    storageModule.checkUser(Reqbody.email, 'local').then(function (data) {
-        if (Object.keys(data).length == 0) {
-            storageModule.createUser(null, Reqbody.name, Reqbody.email, Reqbody.password, null, 'local').then(function (data) {
-                res.redirect('/dashboard');
-            }).otherwise(function (err) {
-                res.redirect('/login');
-            });
-        }
-        else {
-            console.log('user already exists');
+        res.send("Error registering. Please try again later");
+    else {
+        ReqBody = JSON.parse(JSON.stringify(req.body));
+        storageModule.createUser(ReqBody.email, ReqBody.name, ReqBody.password, "http://s3.amazonaws.com/37assets/svn/765-default-avatar.png", 'local', ReqBody.type).then(function (data) {
             res.redirect('/login');
-        }
-    }).otherwise(function (err) {
-        console.log("error finding user in db");
-        res.redirect('/login');
-    });
+        }).otherwise(function (err) {
+            console.log("User already exists. Please login with another email");
+            res.redirect('/login');
+        });
+    }
 });
 
 app.get('/dashboard', isAuthenticated, function (req, res) {
@@ -158,18 +151,20 @@ app.get('/search', isAuthenticated, function (req, res) {
 });
 
 app.post('/search', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('search'))
-        console.log("error getting data");
-    storageModule.searchUser(req.body.search.location).then(function (data) {
-        res.send(data);
+    if (!req.hasOwnProperty('body') || req.body.searchStr == null)
+        res.send("Error registering. Please try again later");
+    storageModule.fetchUser(req.body.searchStr).then(function (data) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
     }).otherwise(function (err) {
-        res.send("No search results");
+        res.end("No search results");
     })
 });
 
 app.post('/otherProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('submit'))
-        console.log("error getting data");
+        res.send("Error registering. Please try again later");
+
     res.redirect('/ticket');
 })
 
@@ -177,59 +172,58 @@ app.get('/ticket', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "ticket.html");
 });
 
+app.post('/ticket', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
+        res.send("Error registering. Please try again later");
+    else {
+        storageModule.createTicket(req.user[0], req.body.tDescr, req.body).then(function (data) {
+            console.log(data)
+        })
+    }
+});
+
 app.get('/editProfile', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "editProfile.html");
 });
 
 app.post('/editProfile', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('name'))
-        console.log("error getting data");
-    storageModule.updateUser(json.stringify(req.body)).then(function (data) {
-        console.log("Succesfully edited!")
+    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
+        res.send("Error.Please try again later");
+    var updated = req.body;
+    updated["_id"] = req.user[0]._id;
+    updated["provider"] = req.user[0].provider;
+    if (req.body.img == "")
+        updated.img = req.user[0].img;
+    storageModule.updateUser(req.body).then(function (data) {
+        res.send("Succesfully edited");
     }).otherwise(function (err) {
-        console.log("Error updating! Please try again later!");
+        res.send("Error updating in. Please try again later!");
     });
-    res.redirect('/search');
 });
 
 app.get('/getCurrUser', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('user'))
-        console.log("error logging in");
+    if (!req.hasOwnProperty('user') || req.user.length <= 0)
+        res.send("Error.Please try again later");
     else {
-        Reqbody = JSON.parse(JSON.stringify(req.user[0]));
-        // var send;
-        // storageModule.checkUser(Reqbody.email, Reqbody.provider).then(function (data) {
-        //     if (Object.keys(data).length == 0)
-        //         send = { "msg": "cant find user" };
-        //     else
-        //         send = data;
-        // }).otherwise(function (err) {
-        //     send = err;
-        // });
-        // console.log(send);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(Reqbody));
+        res.end(JSON.stringify(req.user[0]));
     }
-
 });
 
 app.get('/logout', isAuthenticated, function (req, res) {
     req.logout();
     req.session.destroy(function (err) {
-        console.log("logged out successfully")
         res.redirect('/');
     });
 });
 
 app.get('/error', function (req, res) {
-    console.log('error');
     res.redirect('/login');
 });
 
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated() || req.hasOwnProperty('user'))
         return next();
-    console.log("Not logged in");
     res.redirect('/');
 };
 

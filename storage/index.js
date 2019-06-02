@@ -29,13 +29,13 @@ module.exports = {
     updateUser: function (...args) {
         return storageModule.updateUser(...args);
     },
-    searchUser: function (...args) {
-        return storageModule.searchUser(...args);
+    fetchUser: function (...args) {
+        return storageModule.fetchUser(...args);
     },
     createTicket: function (user, descr, raised) {
         return when.promise(function (resolve, reject) {
-            if (user.hasOwnProperty('raised')) {
-                storageModule.createFirstTicket(descr, raised).then(function (data) {
+            if (!user.hasOwnProperty('raised')) {
+                storageModule.createFirstTicket(user, descr, raised).then(function (data) {
                     return resolve(data);
                 }).otherwise(function (err) {
                     return reject(err);
