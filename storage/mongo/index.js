@@ -30,36 +30,36 @@ module.exports = {
     fetchUser: function (...args) {
         return user.fetchUser(...args);
     },
-    createFirstTicket: function (user, descr, raised) {
+    createTicket: function (citName, citEmail, orgName, orgEmail, startDate, endDate, TDescr, type) {
         return when.promise(function (resolve, reject) {
-            user.checkUser(user.email).then(function (data) {
-                if (Object.keys(data).length == 0)
-                    return resolve({});
-                ticket.createFirstTicket(descr, raised).then(function (data) {
-                    user["ticket"] = data._id;
-                    return resolve(data);
-                }).otherwise(function (err) {
-                    return reject(err);
-                })
-            }).otherwise(function (err) {
-                return reject(err);
-            })
-        })
-    },
-    addNewOrgToTicket: function (uid, raised) {
-        return when.promise(function (resolve, reject) {
-            ticket.searchTicket(uid).then(function (tick) {
-                if (Object.keys(tick).length != 0) {
-                    ticket.addNewOrgToTicket(tick, raised).then(function (data) {
+            ticket.createTicket(citEmail, orgEmail, startDate, endDate, TDescr, type).then(function (tickData) {
+                user.fetchUser(citEmail).then(function (citData) {
+                    user.fetchUser(orgEmail).then(function (orgData) {
+                        if (typeof citData.tickets == "undefined")
+                            citData.tickets[0] = tickData._id;
+                        // citData["tickets"] = tickData._id;
+                        else
+                            citData.tickets[citData.tickets.length] = tickData._id;
+                        // citData.tickets += tickData._id;
+
+                        if (typeof orgData.tickets == "undefined")
+                            orgData.tickets[0] = tickData._id;
+                        // orgData["tickets"] = tickData._id;
+                        else
+                            orgData.tickets[orgData.tickets.length] = tickData._id;
+                        // orgData.tickets += ticketData._id;
+
                         return resolve(data);
                     }).otherwise(function (err) {
                         return reject(err);
                     });
-                }
-                return resolve(data);
-            }).otherwise(function (err) {
-                return reject(err);
-            });
+                }).otherwise(function (err) {
+                    return reject(err);
+                });
+            })
         })
+    },
+    searchTicket: function (...args) {
+        return ticket.searchTicket(...args);
     }
 };

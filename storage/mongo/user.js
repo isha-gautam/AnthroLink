@@ -21,18 +21,16 @@ module.exports = {
     checkUser: function (email, pwd) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
+            var json = {};
             if (typeof email == "string") { //only email: for checking during registering
-                json = { "_id": email };
-                if(typeof pwd=="string")
-                json["pwd"] = pwd;
+                // json = { "_id": email };
+                json["_id"] = email;
+                if (typeof pwd == "string")
+                    json["pwd"] = pwd;
             }
             db.collection("users").find(json).toArray(function (err, data) {
                 if (err)
                     return reject(err);
-                if (Object.keys(data).length == 0) {
-                    console.log("no such user");
-                    return resolve({});
-                }
                 return resolve(data);
             });
         })
@@ -53,14 +51,12 @@ module.exports = {
     fetchUser: function (searchStr) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            db.collection("users").find({ $text: { $search: searchStr } }).then(function (data) {
-                if (Object.keys(data).length == 0)
+            db.collection("users").find({ "$text": { "$search": searchStr } }).toArray(function (err, data) {
+                if (err) {
+                    console.log(err);
                     return reject(err);
-                console.log(data);
+                }
                 return resolve(data);
-            }).otherwise(function (err) {
-                console.log("in user.js fetch user" + err);
-                return reject(err);
             });
         })
     }

@@ -10,7 +10,7 @@ function init() {
             if (!data)
                 alert("Cannot get current user details. Please try to login again.")
             else {
-                console.log(data);
+                alert("Succesfully logged in!");
                 document.getElementById('img').src = data.img;
                 document.getElementById('name').innerText = data.name;
                 document.getElementById('email').innerText = data._id;

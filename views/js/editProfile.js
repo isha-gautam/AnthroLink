@@ -9,7 +9,7 @@ function init() {
             else {
                 document.getElementById('img').src = data.img;
                 document.getElementById('name').value = data.name;
-                document.getElementById('email').value = data.email;
+                document.getElementById('email').value = data._id;
                 document.getElementById('type').value = data.type;
                 if (data.hasOwnProperty('phone'))
                     document.getElementById('phone').value = data.phone;

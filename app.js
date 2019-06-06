@@ -68,10 +68,11 @@ passport.use(new GoogleStrategy({
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        do {
-            var type = prompt("Please enter your type", "Citizen/Organisation");
-        } while (type.toUpperCase() != "CITIZEN" && type.toUpperCase() != "ORGANISATION");
-        type = type.charAt(0) + type.substr(1).toLowerCase();
+        var type = null;
+        // do {
+        //     var type = prompt("Please enter your type", "Citizen/Organisation");
+        // } while (type.toUpperCase() != "CITIZEN" && type.toUpperCase() != "ORGANISATION");
+        // type = type.charAt(0) + type.substr(1).toLowerCase();
         storageModule.createUser(profile.email, profile.displayName, type, photo, profile.provider).then(function (data) {
             done(null, data);
         }).otherwise(function (err) {
@@ -103,8 +104,17 @@ passport.serializeUser(function (user, done) {
     done(null, user);
 });
 
-passport.deserializeUser(function (user, done) {
-    done(null, user);
+passport.deserializeUser(function (obj, done) {
+    storageModule.checkUser(obj._id).then(function (data) {
+        if (!data || Object.keys(data).length == 0) {
+            console.log("user doesnt' exist");
+            done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
+        }
+        else
+            done(null, data);
+    }).otherwise(function (err) {
+        done(err);
+    });
 });
 
 app.get('/auth/google', passport.authenticate('google', {
@@ -158,12 +168,12 @@ app.post('/search', isAuthenticated, function (req, res) {
         res.end(JSON.stringify(data));
     }).otherwise(function (err) {
         res.end("No search results");
-    })
+    });
 });
 
 app.post('/otherProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('submit'))
-        res.send("Error registering. Please try again later");
+        res.send("Error searching. Please try again later");
 
     res.redirect('/ticket');
 })
@@ -174,11 +184,13 @@ app.get('/ticket', isAuthenticated, function (req, res) {
 
 app.post('/ticket', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.send("Error registering. Please try again later");
+        res.jsonp("error");
     else {
-        storageModule.createTicket(req.user[0], req.body.tDescr, req.body).then(function (data) {
-            console.log(data)
-        })
+        storageModule.createTicket(req.body.citName, req.body.citEmail, req.body.orgName, req.body.orgEmail, req.body.startDate, req.body.endDate, req.body.TDescr, req.body.type).then(function (data) {
+            res.jsonp("success");
+        }).otherwise(function (err) {
+            res.jsonp("error");
+        });
     }
 });
 
@@ -189,11 +201,6 @@ app.get('/editProfile', isAuthenticated, function (req, res) {
 app.post('/editProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
         res.send("Error.Please try again later");
-    var updated = req.body;
-    updated["_id"] = req.user[0]._id;
-    updated["provider"] = req.user[0].provider;
-    if (req.body.img == "")
-        updated.img = req.user[0].img;
     storageModule.updateUser(req.body).then(function (data) {
         res.send("Succesfully edited");
     }).otherwise(function (err) {

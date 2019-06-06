@@ -6,14 +6,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="../vendor/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="../jquery-ui-1.12.1.custom/jquery-ui.min.css"> -->
     <link href="../css/style.css" rel="stylesheet">
     <script src="../vendor/jquery-3.3.1.min.js"></script>
     <script src="../vendor/popper.min.js"></script>
+    <!-- <script src="../jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+    <script src="../jquery-ui-1.12.1.custom/jquery-ui.min.js"></script> -->
     <script src="../vendor/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
     <script src="../js/ticket.js"></script>
 </head>
 
-<body>
+<body onload="init()">
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,11 +46,17 @@
     <div class="container">
         <div class="col-lg-12 newTicket">
             <h5>Raise New Ticket</h5>
-            <form id="newTic" method="post" action="../../app.js" class="form-horizontal" role="form">
+            <form id="newTic" method="post" action="/ticket" class="form-horizontal" role="form">
                 <div class="form-group">
                     <label class="col-lg-3 control-label">Citizen Name:</label>
                     <div class="col-lg-8">
                         <input name="citName" id="citName" class="form-control" type="text" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Citizen Email:</label>
+                    <div class="col-lg-8">
+                        <input name="citEmail" id="citEmail" class="form-control" type="text" readonly>
                     </div>
                 </div>
                 <div class="form-group">
@@ -57,9 +66,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-lg-3 control-label">Pickup Date</label>
+                    <label class="col-lg-3 control-label">Organisation Email</label>
                     <div class="col-lg-8">
-                        <input name="pickup" id="pickup" class="form-control" type="date">
+                        <input name="orgEmail" id="orgEmail" class="form-control" type="text" readonly>
                     </div>
                 </div>
                 <div class="form-group">
@@ -72,6 +81,26 @@
                             <option value="Monetary Donations">
                             <option value="Non-Monetary Donations">
                         </datalist>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Type</label>
+                    <div class="col-lg-8">
+                        <input list="type" name="type" placeholder="type" class="form-control" required>
+                        <datalist id="type">
+                            <option value="Once">
+                            <option value="Recurring (Daily)">
+                            <option value="Recurring (Weekly)">
+                            <option value="Recurring (Monthly)">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">Pickup Date</label>
+                    <div class="col-lg-8" id="datepicker">
+                        <input type="date" class="input-sm form-control" id="startDate" name="startDate" required>
+                        <span class="input-group-addon"> to </span>
+                        <input type="date" class="input-sm form-control" id="endDate" name="endDate" required>
                     </div>
                 </div>
                 <div class="form-group">

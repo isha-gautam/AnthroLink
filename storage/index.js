@@ -32,21 +32,10 @@ module.exports = {
     fetchUser: function (...args) {
         return storageModule.fetchUser(...args);
     },
-    createTicket: function (user, descr, raised) {
-        return when.promise(function (resolve, reject) {
-            if (!user.hasOwnProperty('raised')) {
-                storageModule.createFirstTicket(user, descr, raised).then(function (data) {
-                    return resolve(data);
-                }).otherwise(function (err) {
-                    return reject(err);
-                });
-            } else {
-                storageModule.addNewOrgToTicket(user._id, raised).then(function (data) {
-                    return resolve(data);
-                }).otherwise(function (err) {
-                    return reject(err);
-                });
-            }
-        })
+    createTicket: function (...args) {
+        return storageModule.createTicket(...args);
+    },
+    searchTicket:function(...args){
+        return storageModule.searchTicket(...args);
     }
 };
