@@ -1,6 +1,6 @@
 var util = require('./utils');
 var when = require('when');
-var uuid = require('uuid-random');
+
 module.exports = {
     createUser: function (email, name, pwd, imgURL, provider, type) {
         return when.promise(function (resolve, reject) {

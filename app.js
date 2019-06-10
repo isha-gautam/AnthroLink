@@ -68,12 +68,12 @@ passport.use(new GoogleStrategy({
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        var type = null;
+        // var type = null;
         // do {
-        //     var type = prompt("Please enter your type", "Citizen/Organisation");
+        //     type = prompt("Please enter your type", "Citizen/Organisation");
         // } while (type.toUpperCase() != "CITIZEN" && type.toUpperCase() != "ORGANISATION");
         // type = type.charAt(0) + type.substr(1).toLowerCase();
-        storageModule.createUser(profile.email, profile.displayName, type, photo, profile.provider).then(function (data) {
+        storageModule.createUser(profile.emails[0].value, profile.displayName, photo, profile.provider).then(function (data) {
             done(null, data);
         }).otherwise(function (err) {
             done(err);
@@ -111,7 +111,7 @@ passport.deserializeUser(function (obj, done) {
             done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
         }
         else
-            done(null, data);
+            done(null, obj);
     }).otherwise(function (err) {
         done(err);
     });
@@ -162,9 +162,9 @@ app.get('/search', isAuthenticated, function (req, res) {
 
 app.post('/search', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || req.body.searchStr == null)
-        res.send("Error registering. Please try again later");
+        res.send("Error getting data. Please try again later");
     storageModule.fetchUser(req.body.searchStr).then(function (data) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(200,{ 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
     }).otherwise(function (err) {
         res.end("No search results");
@@ -210,7 +210,7 @@ app.post('/editProfile', isAuthenticated, function (req, res) {
 
 app.get('/getCurrUser', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('user') || req.user.length <= 0)
-        res.send("Error.Please try again later");
+        res.send("Error. Please try again later");
     else {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(req.user[0]));
