@@ -37,5 +37,8 @@ module.exports = {
     },
     searchTicket:function(...args){
         return storageModule.searchTicket(...args);
+    },
+    updateTicketStat: function (...args) {
+        return storageModule.updateTicketStat(...args);
     }
 };

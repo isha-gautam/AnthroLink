@@ -32,34 +32,53 @@ module.exports = {
     },
     createTicket: function (citName, citEmail, orgName, orgEmail, startDate, endDate, TDescr, type) {
         return when.promise(function (resolve, reject) {
-            ticket.createTicket(citEmail, orgEmail, startDate, endDate, TDescr, type).then(function (tickData) {
-                user.fetchUser(citEmail).then(function (citData) {
-                    user.fetchUser(orgEmail).then(function (orgData) {
-                        if (typeof citData.tickets == "undefined")
-                            citData.tickets[0] = tickData._id;
-                        // citData["tickets"] = tickData._id;
-                        else
-                            citData.tickets[citData.tickets.length] = tickData._id;
-                        // citData.tickets += tickData._id;
+            ticket.createTicket(citName, citEmail, orgName, orgEmail, startDate, endDate, TDescr, type).then(function (tick) {
+                var tickData = tick.ops[0];
+                user.checkUser(citEmail, null).then(function (cit) {
+                    var citData = cit[0];
+                    user.checkUser(orgEmail, null).then(function (org) {
+                        var orgData = org[0];
+                        var arr = citData.tickets;
+                        if (typeof arr == "undefined")
+                            arr = new Array();
+                        arr.push(tickData._id);
+                        citData.tickets = arr;
 
-                        if (typeof orgData.tickets == "undefined")
-                            orgData.tickets[0] = tickData._id;
-                        // orgData["tickets"] = tickData._id;
-                        else
-                            orgData.tickets[orgData.tickets.length] = tickData._id;
-                        // orgData.tickets += ticketData._id;
+                        arr = orgData.tickets;
+                        if (typeof arr == "undefined")
+                            arr = new Array();
+                        arr.push(tickData._id);
+                        orgData.tickets = arr;
 
-                        return resolve(data);
+                        user.updateUser(citData).then(function (data) {
+                            user.updateUser(orgData).then(function (data) {
+                                ticket.deleteTicket(tickData._id);
+                                return resolve(data);
+                            }).otherwise(function (err) {
+                                ticket.deleteTicket(tickData._id);
+                                return reject(err);
+                            });
+                        }).otherwise(function (err) {
+                            ticket.deleteTicket(tickData._id);
+                            return reject(err);
+                        });
                     }).otherwise(function (err) {
+                        ticket.deleteTicket(tickData._id);
                         return reject(err);
                     });
                 }).otherwise(function (err) {
+                    ticket.deleteTicket(tickData._id);
                     return reject(err);
                 });
+            }).otherwise(function (err) {
+                return reject(err);
             })
         })
     },
     searchTicket: function (...args) {
         return ticket.searchTicket(...args);
+    },
+    updateTicketStat: function (...args) {
+        return ticket.updateTicketStat(...args);
     }
 };

@@ -23,7 +23,6 @@ module.exports = {
             var db = util.getDb();
             var json = {};
             if (typeof email == "string") { //only email: for checking during registering
-                // json = { "_id": email };
                 json["_id"] = email;
                 if (typeof pwd == "string")
                     json["pwd"] = pwd;
@@ -36,11 +35,19 @@ module.exports = {
         })
     },
 
-    updateUser: function (updated) {
+    updateUser: function (updated, user) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
-            newVal = { $set: { name: updated.name, img: updated.img, address: updated.address, phone: updated.phone } };
-            db.collection("users").updateOne({ "_id": updated._id }, newVal, function (err, data) {
+            var image;
+            if (updated.type == "Citizen")
+                image = "https://img.icons8.com/cotton/64/000000/gender-neutral-user.png";
+            else
+                image = "https://img.icons8.com/metro/52/000000/organization.png";
+            if (!user.hasOwnProperty('tickets'))
+                newVal = { $set: { name: updated.name, img: image, type: updated.type, address: updated.address, phone: updated.phone, bio: updated.bio } };
+            else
+                newVal = { $set: { name: updated.name, img: image, type: updated.type, address: updated.address, phone: updated.phone, bio: updated.bio, tickets: user.tickets } };
+            db.collection("users").updateOne({ "_id": user._id }, newVal, function (err, data) {
                 if (err || data.matchedCount == 0)
                     return reject(err);
                 return resolve(data);

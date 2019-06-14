@@ -41,35 +41,126 @@
     </nav>
     <div class="container">
         <div class="row profile">
-            <div class="col-lg-3">
-                <div class="profile-sidebar">
-                    <div class="profile-userpic">
-                        <img id="img" class="img-responsive">
+            <div class="profile-sidebar col-lg-3">
+                <div class="profile-userpic">
+                    <img id="img" class="img-responsive">
+                </div>
+                <div class="profile-userinfo">
+                    <div id="name" class="profile-userinfo-name">
+                        Name
                     </div>
-                    <div class="profile-userinfo">
-                        <div id="name" class="profile-userinfo-name">
-                            Name
-                        </div>
-                        <div id="email" class="profile-userinfo-email">
-                            Email
-                        </div>
+                    <div id="email" class="profile-userinfo-email">
+                        Email
                     </div>
-                    <div class="profile-userbutton">
-                        <button onclick="location.href='editProfile'" type="button" class="btn btn-success btn-lg">Edit
-                            Profile</button>
-                    </div>
+                </div>
+                <div class="profile-userbutton">
+                    <button onclick="location.href='editProfile'" type="button" class="btn btn-success btn-lg">Edit
+                        Profile</button>
                 </div>
             </div>
             <div class="col-lg-9">
-                <div class="profile-content">
-                    <div class="ticketTab">
-                        <p id="upcoming">upcoming Pickups</p>
+                <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="pill" role="tab" href="#upcoming"
+                            aria-controls="upcoming" aria-selected="true">
+                            <h5>Upcoming</h5>
+                        </a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="pill" roll="tab" href="#pending"
+                            aria-controls="pending" aria-selected="false">
+                            <h5>Pending</h5>
+                        </a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="pill" roll="tab" href="#previous"
+                            aria-controls="previous" aria-selected="false">
+                            <h5>Previous</h5>
+                        </a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="pill" roll="tab" href="#all"
+                            aria-controls="all" aria-selected="false">
+                            <h5>All</h5>
+                        </a></li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent">
+                    <div id="upcoming" class="container tab-pane fade show active" role="tabpanel"
+                        aria-labelledby="upcoming"><br>
+                        <table class="table table-bordered table-hover" id="upcomingT" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        With
+                                    </th>
+                                    <th class="text-center">
+                                        Pickup On
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='uaddr0'></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="ticketTab">
-                        <p id="upcoming">Waiting Tickets</p>
+                    <div id="pending" class="container tab-pane fade" role="tabpanel" aria-labelledby="pending"><br>
+                        <table class="table table-bordered table-hover" id="pendingT" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        With
+                                    </th>
+                                    <th class="text-center">
+                                        Created On
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='paddr0'></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="ticketTab">
-                        <p id="previous">previous</p>
+                    <div id="previous" class="container tab-pane fade" role="tabpanel" aria-labelledby="previous"><br>
+                        <table class="table table-bordered table-hover" id="previousT" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        With
+                                    </th>
+                                    <th class="text-center">
+                                        Pickup On
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='preaddr0'></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="all" class="container tab-pane fade" role="tabpanel" aria-labelledby="all"><br>
+                        <table class="table table-bordered table-hover" id="allT" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        With
+                                    </th>
+                                    <th class="text-center">
+                                        Description
+                                    </th>
+                                    <th class="text-center">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='addr0'></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

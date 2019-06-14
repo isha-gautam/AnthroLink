@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>OrgProfile</title>
+    <title>Profile</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="../vendor/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
@@ -10,10 +10,10 @@
     <script src="../vendor/jquery-3.3.1.min.js"></script>
     <script src="../vendor/popper.min.js"></script>
     <script src="../vendor/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-    <script src="../js/orgProfile.js"></script>
+    <script src="../js/otherProfile.js"></script>
 </head>
 
-<body>
+<body onload="init()">
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,26 +40,28 @@
             </ul>
         </div>
     </nav>
-    <div class="container">
-        <div class="row">
+    <div class="container" style="padding: 10%;">
+        <div class="row col-lg-12">
             <div class="col-lg-8">
-                <p id="descr">desrc</p>
+                <div id="bio"></div>
             </div>
             <div class="col-lg-4">
-                <img src="../img/avatar-circle-human-female-black-7-512.png" height="100%" width="100%">
+                <img id="img" height="70%" width="80%">
+            </div>
+        </div>
+        <div class="row col-lg-12" style="flex: 0;">
+            <div class="col-lg-8">
+                <div id="address"></div>
+                <div id="phone"></div>
+            </div>
+            <div class="col-lg-4">
+                <div id="name"></div>
+                <div id="email"></div>
             </div>
         </div>
         <br>
         <br>
-        <div class="col-lg-12 newTicket">
-            <form id="newTic" method="post" action="../../app.js" class="form-horizontal" role="form">
-                <div class="form-group">
-                    <label class="col-lg-3 control-label"></label>
-                    <div class="col-lg-8">
-                        <input type="submit" class="btn btn-primary" value="Raise Ticket">
-                    </div>
-                </div>
-            </form>
+        <div class="row" id="raiseT">
         </div>
     </div>
 </body>

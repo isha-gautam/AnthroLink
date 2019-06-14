@@ -9,10 +9,9 @@
     <script src="../vendor/jquery-3.3.1.min.js"></script>
     <script src="../vendor/popper.min.js"></script>
     <script src="../vendor/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-    <script src="../js/search.js"></script>
 </head>
 
-<body onload="init()">
+<body>
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +43,8 @@
             <div class="banner-content">
                 <div class="container">
                     <div class="col-sm-12">
-                        <form id="search" method="post" action="/search" class="card card-sm" role="form">
+                        <!-- <form id="search" method="post" action="/search" class="card card-sm" role="form"> -->
+                        <div id="form" class="form row" name="form">
                             <div class="card-body row no-gutters align-items-center">
                                 <div class="col-auto">
                                     <i class="fas fa-search h4 text-body"></i>
@@ -59,17 +59,36 @@
                                         type="submit">Search</button>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <p id="results">
-                                p
-                            </p>
+                            <!-- </form> -->
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-10 align-items-center">
+                        <table class="table table-bordered table-hover" id="tab_logic" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        Name
+                                    </th>
+                                    <th class="text-center">
+                                        Type
+                                    </th>
+                                    <th class="text-center">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='addr0'></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="../js/search.js"></script>
 </body>

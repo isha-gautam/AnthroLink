@@ -16,15 +16,16 @@ function init() {
     });
 
     $.ajax({
-        url: '/getCurrOrg',
+        url: '/othPro',
         type: 'GET',
         dataType: 'json',
+        data: { othPro: window.location.search.substring(8) },
         success: function (data) {
             if (!data)
                 alert("Cannot get current user details. Please try to login again.")
             else {
                 document.getElementById('orgName').value = data.name;
-                document.getElementById('orgEmail').value = data.email;
+                document.getElementById('orgEmail').value = data._id;
             }
         }, error: function (xhr) {
             alert("An error occured: " + xhr.status + " " + xhr.statusText);
@@ -32,10 +33,29 @@ function init() {
     });
 
     var today = new Date();
-    today = today.getDate + "-" + today.getMonth + "-" + today.getFullYear;
-    // today = today.getFullYear + "-" + today.getMonth + "-" + today.getDate;
-    document.getElementById('startDate') = today;
-    document.getElementById('endDate') = today;
-
+    var month = today.getMonth() + 1;
+    if (month < 10)
+        month = "0" + month;
+    var date = today.getFullYear() + "-" + month + "-" + today.getDate();
+    document.getElementById('startDate').value = date;
+    document.getElementById('endDate').value = date;
+    document.getElementById('startDate').min = date;
+    document.getElementById('endDate').min = date;
 }
+
+$("#submit").click(function (e) {
+    e.preventDefault();
+    $.ajax({
+        url: '/search',
+        type: 'POST',
+        dataType: 'json',
+        success: function (data) {
+            alert("Ticket Raised");
+        }, error: function (xhr) {
+            alert("An error occured: " + xhr.status + " " + xhr.statusText);
+        }
+    })
+})
+
+
 

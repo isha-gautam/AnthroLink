@@ -68,11 +68,6 @@ passport.use(new GoogleStrategy({
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        // var type = null;
-        // do {
-        //     type = prompt("Please enter your type", "Citizen/Organisation");
-        // } while (type.toUpperCase() != "CITIZEN" && type.toUpperCase() != "ORGANISATION");
-        // type = type.charAt(0) + type.substr(1).toLowerCase();
         storageModule.createUser(profile.emails[0].value, profile.displayName, photo, profile.provider).then(function (data) {
             done(null, data);
         }).otherwise(function (err) {
@@ -105,13 +100,13 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (obj, done) {
-    storageModule.checkUser(obj._id).then(function (data) {
+    storageModule.checkUser(obj[0]._id).then(function (data) {
         if (!data || Object.keys(data).length == 0) {
             console.log("user doesnt' exist");
             done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
         }
         else
-            done(null, obj);
+            done(null, data);
     }).otherwise(function (err) {
         done(err);
     });
@@ -124,7 +119,7 @@ app.get('/auth/google', passport.authenticate('google', {
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/error' }),
     function (req, res) {
-        res.redirect('/dashboard');
+        res.redirect('/editProfile');
     }
 );
 
@@ -143,7 +138,12 @@ app.post('/register', function (req, res) {
         res.send("Error registering. Please try again later");
     else {
         ReqBody = JSON.parse(JSON.stringify(req.body));
-        storageModule.createUser(ReqBody.email, ReqBody.name, ReqBody.password, "http://s3.amazonaws.com/37assets/svn/765-default-avatar.png", 'local', ReqBody.type).then(function (data) {
+        var img;
+        if (ReqBody.type == "Citizen")
+            img = "https://img.icons8.com/cotton/64/000000/gender-neutral-user.png";
+        else
+            img = "https://img.icons8.com/metro/52/000000/organization.png";
+        storageModule.createUser(ReqBody.email, ReqBody.name, ReqBody.password, img, 'local', ReqBody.type).then(function (data) {
             res.redirect('/login');
         }).otherwise(function (err) {
             console.log("User already exists. Please login with another email");
@@ -161,35 +161,42 @@ app.get('/search', isAuthenticated, function (req, res) {
 });
 
 app.post('/search', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('body') || req.body.searchStr == null)
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('searchStr'))
         res.send("Error getting data. Please try again later");
     storageModule.fetchUser(req.body.searchStr).then(function (data) {
-        res.writeHead(200,{ 'Content-Type': 'application/json' });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
     }).otherwise(function (err) {
         res.end("No search results");
     });
 });
 
-app.post('/otherProfile', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('submit'))
-        res.send("Error searching. Please try again later");
+app.get('/otherProfile', isAuthenticated, function (req, res) {
+    res.sendFile(__dirname + "/views/html/" + "otherProfile.html");
+});
 
-    res.redirect('/ticket');
-})
+app.post('/otherProfile', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('othPro'))
+        res.send("Error.Please try again later");
+    else {
+        console.log(req.body.othPro);
+        res.redirect("/ticket");
+    }
+});
 
 app.get('/ticket', isAuthenticated, function (req, res) {
     res.sendFile(__dirname + "/views/html/" + "ticket.html");
 });
 
 app.post('/ticket', isAuthenticated, function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.jsonp("error");
+        res.end(JSON.stringify("Error Please try again later"));
     else {
         storageModule.createTicket(req.body.citName, req.body.citEmail, req.body.orgName, req.body.orgEmail, req.body.startDate, req.body.endDate, req.body.TDescr, req.body.type).then(function (data) {
-            res.jsonp("success");
+            res.end(JSON.stringify(data));
         }).otherwise(function (err) {
-            res.jsonp("error");
+            res.end(JSON.stringify("Error Please try again later"));
         });
     }
 });
@@ -201,8 +208,8 @@ app.get('/editProfile', isAuthenticated, function (req, res) {
 app.post('/editProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
         res.send("Error.Please try again later");
-    storageModule.updateUser(req.body).then(function (data) {
-        res.send("Succesfully edited");
+    storageModule.updateUser(req.body, req.user[0]).then(function (data) {
+        res.send("Successfully edited");
     }).otherwise(function (err) {
         res.send("Error updating in. Please try again later!");
     });
@@ -214,6 +221,46 @@ app.get('/getCurrUser', isAuthenticated, function (req, res) {
     else {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(req.user[0]));
+    }
+});
+
+app.get('/othPro', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.query.hasOwnProperty('othPro'))
+        res.send("Error.Please try again later");
+    else {
+        storageModule.checkUser(req.query.othPro).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data[0]));
+        }).otherwise(function (err) {
+            res.end({ "msg": "sorry err" });
+        });
+    }
+});
+
+app.get('/getTicks', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || req.body.length < 0)
+        res.send("Error.Please try again later");
+    else {
+        storageModule.searchTicket(req.user[0]._id).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+        }).otherwise(function (err) {
+            res.end({ "msg": "sorry err" });
+        });
+    }
+});
+
+app.post('/updateStatus', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('stat'))
+        res.send("Error.Please try again later");
+    else {
+        storageModule.updateTicketStat(req.body.stat.id, req.body.stat.status).then(function (data) {
+            console.log("done")
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end("success");
+        }).otherwise(function (err) {
+            res.end("sorry err");
+        });
     }
 });
 
