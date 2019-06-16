@@ -12,6 +12,7 @@ var session = require('express-session');
 var IP, mode, PORT;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
+var path = require('path');
 
 // Check https enable or not
 if (config.hasOwnProperty('https')) {
@@ -124,7 +125,7 @@ app.get('/auth/google/callback',
 );
 
 app.get('/login', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "login.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "login.html"));
 });
 
 app.post('/login', passport.authenticate('local', {
@@ -135,7 +136,7 @@ app.post('/login', passport.authenticate('local', {
 app.post('/register', function (req, res) {
     var ReqBody;
     if (!req.hasOwnProperty('body'))
-        res.send("Error registering. Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         ReqBody = JSON.parse(JSON.stringify(req.body));
         var img;
@@ -153,71 +154,71 @@ app.post('/register', function (req, res) {
 });
 
 app.get('/dashboard', isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "dashboard.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "dashboard.html"));
 });
 
 app.get('/search', isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "search.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "search.html"));
 });
 
 app.post('/search', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('searchStr'))
-        res.send("Error getting data. Please try again later");
-    storageModule.fetchUser(req.body.searchStr).then(function (data) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(data));
-    }).otherwise(function (err) {
-        res.end("No search results");
-    });
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax."); else {
+        storageModule.fetchUser(req.body.searchStr).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+        }).otherwise(function (err) {
+            res.end("No search results");
+        });
+    }
 });
 
 app.get('/otherProfile', isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "otherProfile.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "otherProfile.html"));
 });
 
 app.post('/otherProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('othPro'))
-        res.send("Error.Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
-        console.log(req.body.othPro);
         res.redirect("/ticket");
     }
 });
 
 app.get('/ticket', isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "ticket.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "ticket.html"));
 });
 
 app.post('/ticket', isAuthenticated, function (req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.end(JSON.stringify("Error Please try again later"));
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.createTicket(req.body.citName, req.body.citEmail, req.body.orgName, req.body.orgEmail, req.body.startDate, req.body.endDate, req.body.TDescr, req.body.type).then(function (data) {
             res.end(JSON.stringify(data));
         }).otherwise(function (err) {
-            res.end(JSON.stringify("Error Please try again later"));
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
         });
     }
 });
 
 app.get('/editProfile', isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "editProfile.html");
+    res.sendFile(path.join(__dirname, "/views/html/", "editProfile.html"));
 });
 
 app.post('/editProfile', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.send("Error.Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     storageModule.updateUser(req.body, req.user[0]).then(function (data) {
         res.send("Successfully edited");
     }).otherwise(function (err) {
-        res.send("Error updating in. Please try again later!");
+        res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
     });
 });
 
 app.get('/getCurrUser', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('user') || req.user.length <= 0)
-        res.send("Error. Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(req.user[0]));
@@ -226,40 +227,40 @@ app.get('/getCurrUser', isAuthenticated, function (req, res) {
 
 app.get('/othPro', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.query.hasOwnProperty('othPro'))
-        res.send("Error.Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.checkUser(req.query.othPro).then(function (data) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(data[0]));
         }).otherwise(function (err) {
-            res.end({ "msg": "sorry err" });
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
         });
     }
 });
 
 app.get('/getTicks', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || req.body.length < 0)
-        res.send("Error.Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.searchTicket(req.user[0]._id).then(function (data) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(data));
         }).otherwise(function (err) {
-            res.end({ "msg": "sorry err" });
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
         });
     }
 });
 
 app.post('/updateStatus', isAuthenticated, function (req, res) {
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('stat'))
-        res.send("Error.Please try again later");
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.updateTicketStat(req.body.stat.id, req.body.stat.status).then(function (data) {
             console.log("done")
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end("success");
         }).otherwise(function (err) {
-            res.end("sorry err");
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
         });
     }
 });

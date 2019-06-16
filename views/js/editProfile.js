@@ -7,7 +7,8 @@ function init() {
             if (!data)
                 alert("Cannot get current user details. Please try to login again.")
             else {
-                document.getElementById('img').src = data.img;
+                if (data.hasOwnProperty('img'))
+                    document.getElementById('img').src = data.img;
                 document.getElementById('name').value = data.name;
                 document.getElementById('email').value = data._id;
                 if (data.type == null)
