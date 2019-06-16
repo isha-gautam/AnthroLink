@@ -7,8 +7,10 @@ function init() {
             if (!data)
                 alert("Cannot get current user details. Please try to login again.")
             else {
-                document.getElementById('citName').value = data.name;
-                document.getElementById('citEmail').value = data._id;
+                if (data.name != null)
+                    document.getElementById('citName').value = data.name;
+                if (data._id != null)
+                    document.getElementById('citEmail').value = data._id;
             }
         }, error: function (xhr) {
             alert("An error occured: " + xhr.status + " " + xhr.statusText);
@@ -24,8 +26,10 @@ function init() {
             if (!data)
                 alert("Cannot get current user details. Please try to login again.")
             else {
-                document.getElementById('orgName').value = data.name;
-                document.getElementById('orgEmail').value = data._id;
+                if (data.name != null)
+                    document.getElementById('orgName').value = data.name;
+                if (data._id != null)
+                    document.getElementById('orgEmail').value = data._id;
             }
         }, error: function (xhr) {
             alert("An error occured: " + xhr.status + " " + xhr.statusText);

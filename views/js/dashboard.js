@@ -14,8 +14,10 @@ function init() {
                 currUser = data;
                 if (data.img != null)
                     document.getElementById('img').src = data.img;
-                document.getElementById('name').innerText = data.name;
-                document.getElementById('email').innerText = data._id;
+                if (data.name != null)
+                    document.getElementById('name').innerText = data.name;
+                if (data._id != null)
+                    document.getElementById('email').innerText = data._id;
             }
         }, error: function (xhr) {
             alert("An error occured: " + xhr.status + " " + xhr.statusText);

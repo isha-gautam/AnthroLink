@@ -9,8 +9,10 @@ function init() {
             else {
                 if (data.hasOwnProperty('img'))
                     document.getElementById('img').src = data.img;
-                document.getElementById('name').value = data.name;
-                document.getElementById('email').value = data._id;
+                if (data.name != null)
+                    document.getElementById('name').value = data.name;
+                if (data._id != null)
+                    document.getElementById('email').value = data._id;
                 if (data.type == null)
                     $('#typeL').html("<select id='type' name='type' class='form-control' required><option>Citizen</option><option>Organisation</option></select>");
                 else

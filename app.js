@@ -18,19 +18,19 @@ var path = require('path');
 if (config.hasOwnProperty('https')) {
     var credentials = { key: config.https.key, cert: config.https.cert };
     Server = https.createServer(credentials, app);
-    console.log('App starting with HTTPS enabled');
+    log('App starting with HTTPS enabled');
     mode = "https";
 }
 else if (config.hasOwnProperty('http')) {
     Server = http.createServer(app);
-    console.log('App starting with HTTP enabled');
+    log('App starting with HTTP enabled');
     mode = "http";
 }
 else
     return process.exit(1);
 
 if (!config.hasOwnProperty('GoogleApi') || !config.GoogleApi.hasOwnProperty('client_Id') || !config.GoogleApi.hasOwnProperty('client_Secret')) {
-    console.log('Incomplete information');
+    log('Incomplete information');
     return process.exit(1);
 }
 
@@ -38,7 +38,7 @@ IP = config.hasOwnProperty('IP') ? config.IP : '127.0.0.1';
 PORT = config.hasOwnProperty('PORT') ? config.PORT : (process.env.PORT || 8080);
 
 if (!storageModule.init(config)) {
-    console.log('Cannot connect to DB');
+    log('Cannot connect to DB');
     return process.exit(1);
 }
 
@@ -86,7 +86,7 @@ passport.use(new LocalStrategy({
         return done({ 'err': { "msg": "Incomplete data", "code": "" } });
     storageModule.checkUser(email, password).then(function (data) {
         if (!data || Object.keys(data).length == 0) {
-            console.log("user doesnt' exist");
+            log("user doesnt' exist");
             done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
         }
         else
@@ -103,7 +103,7 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (obj, done) {
     storageModule.checkUser(obj[0]._id).then(function (data) {
         if (!data || Object.keys(data).length == 0) {
-            console.log("user doesnt' exist");
+            log("user doesnt' exist");
             done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
         }
         else
@@ -147,7 +147,7 @@ app.post('/register', function (req, res) {
         storageModule.createUser(ReqBody.email, ReqBody.name, ReqBody.password, img, 'local', ReqBody.type).then(function (data) {
             res.redirect('/login');
         }).otherwise(function (err) {
-            console.log("User already exists. Please login with another email");
+            log("User already exists. Please login with another email");
             res.redirect('/login');
         });
     }
@@ -256,7 +256,7 @@ app.post('/updateStatus', isAuthenticated, function (req, res) {
         res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.updateTicketStat(req.body.stat.id, req.body.stat.status).then(function (data) {
-            console.log("done")
+            log("done")
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end("success");
         }).otherwise(function (err) {
@@ -283,5 +283,5 @@ function isAuthenticated(req, res, next) {
 };
 
 Server.listen(PORT, IP, () => {
-    console.log('Listening to port ' + PORT);
+    log('Listening to port ' + PORT);
 });

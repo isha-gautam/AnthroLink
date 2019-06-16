@@ -10,8 +10,10 @@ function init() {
             else {
                 if (data.hasOwnProperty('img') && data.img != null)
                     document.getElementById('img').src = data.img;
-                document.getElementById('name').innerText = data.name;
-                document.getElementById('email').innerText = data._id;
+                if (data.name != null)
+                    document.getElementById('name').innerText = data.name;
+                if (data._id != null)
+                    document.getElementById('email').innerText = data._id;
                 if (data.hasOwnProperty('phone'))
                     document.getElementById('phone').innerText = data.phone;
                 if (data.hasOwnProperty('address'))

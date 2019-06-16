@@ -60,7 +60,7 @@ module.exports = {
             var db = util.getDb();
             db.collection("users").find({ "$text": { "$search": searchStr } }).toArray(function (err, data) {
                 if (err) {
-                    console.log(err);
+                    log(err);
                     return reject(err);
                 }
                 return resolve(data);
