@@ -14,7 +14,7 @@ function init() {
                 if (data._id != null)
                     document.getElementById('email').value = data._id;
                 if (data.type == null)
-                    $('#typeL').html("<select id='type' name='type' class='form-control' required><option>Citizen</option><option>Organisation</option></select>");
+                    $('#typeL').html("<select id='type' name='type' class='form-control' required><option>Not specified yet</option><option>Citizen</option><option>Organisation</option></select>");
                 else
                     $('#typeL').html("<div name='type' id='type' class='form-control' readonly>" + data.type + "</div>");
                 if (data.hasOwnProperty('phone'))
@@ -29,3 +29,31 @@ function init() {
         }
     })
 }
+
+$(document).ready(function () {
+    $("#submit").click(function (e) {
+        e.preventDefault();
+        form = {
+            "name": $("#name").val(),
+            "_id": $("#email").val(),
+            "typeL": $("#typeL").val(),
+            "address": $("#address").val(),
+            "phone": $("#phone").val(),
+            "bio": $("#bio").val(),
+        };
+        $.ajax({
+            url: '/editProfile',
+            type: 'POST',
+            dataType: 'text',
+            data: { form: form },
+            success: function (data) {
+                alert(data);
+            }, error: function (xhr) {
+                alert("An error occured: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    })
+});
+
+
+

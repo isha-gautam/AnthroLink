@@ -41,12 +41,10 @@
         </div>
     </nav>
     <div class="container">
-        <form id="edit-profile" method="post" action="/editProfile" class="form-horizontal row col-lg-12" role="form">
+        <div id="edit-profile" class="form-horizontal row col-lg-12">
             <div class="col-lg-3">
                 <div class="text-center">
                     <img id="img" class="avatar img-circle" alt="avatar" height="50%" width="50%">
-                    <h6>Upload a different photo...</h6>
-                    <input name="img" type="file" class="form-control">
                 </div>
             </div>
             <div class="col-lg-9 profile">
@@ -77,11 +75,11 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label"></label>
-                    <input type="submit" class="btn btn-primary" value="Save Changes">
+                    <button type="submit" id="submit" class="btn btn-primary">Save Changes</button>
                     <input type="reset" class="btn btn-default" value="Cancel">
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </body>
 

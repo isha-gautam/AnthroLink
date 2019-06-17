@@ -52,7 +52,6 @@ module.exports = {
 
                         user.updateUser(citData).then(function (data) {
                             user.updateUser(orgData).then(function (data) {
-                                ticket.deleteTicket(tickData._id);
                                 return resolve(data);
                             }).otherwise(function (err) {
                                 ticket.deleteTicket(tickData._id);

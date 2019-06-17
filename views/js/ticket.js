@@ -46,20 +46,31 @@ function init() {
     document.getElementById('startDate').min = date;
     document.getElementById('endDate').min = date;
 }
-
-$("#submit").click(function (e) {
-    e.preventDefault();
-    $.ajax({
-        url: '/search',
-        type: 'POST',
-        dataType: 'json',
-        success: function (data) {
-            alert("Ticket Raised");
-        }, error: function (xhr) {
-            alert("An error occured: " + xhr.status + " " + xhr.statusText);
-        }
+$(document).ready(function () {
+    $("#submit").click(function (e) {
+        e.preventDefault();
+        form = {
+            "citName": $("#citName").val(),
+            "citEmail": $("#citEmail").val(),
+            "orgName": $("#orgName").val(),
+            "orgEmail": $("#orgEmail").val(),
+            "TDescr": $("#TDescr").val(),
+            "type": $("#type").val(),
+            "startDate": $("#startDate").val(),
+            "endDate": $("#endDate").val()
+        };
+        $.ajax({
+            url: '/ticket',
+            type: 'POST',
+            dataType: 'text',
+            data: { form: form },
+            success: function (data) {
+                alert("Ticket Raised");
+            }, error: function (xhr) {
+                alert("An error occured: " + xhr.status + " " + xhr.statusText);
+            }
+        });
     })
-})
-
+});
 
 

@@ -1,5 +1,7 @@
 var util = require('./utils');
 var when = require('when');
+require('winston');
+var log = require('../../src/log');
 
 module.exports = {
     createUser: function (email, name, pwd, imgURL, provider, type) {
@@ -35,19 +37,28 @@ module.exports = {
         })
     },
 
-    updateUser: function (updated, user) {
+    updateUser: function (updated) {
         return when.promise(function (resolve, reject) {
             var db = util.getDb();
             var image;
+            var newVal;
+            if (typeof updated.address == "undefined")
+                updated.address = null;
+            if (typeof updated.phone == "undefined")
+                updated.phone = null;
+            if (typeof updated.bio == "undefined")
+                updated.bio = null;
+            if (typeof updated.phone == "undefined")
+                updated.phone = null;
             if (updated.type == "Citizen")
                 image = "https://img.icons8.com/cotton/64/000000/gender-neutral-user.png";
             else
                 image = "https://img.icons8.com/metro/52/000000/organization.png";
-            if (!user.hasOwnProperty('tickets'))
+            if (!updated.hasOwnProperty('tickets'))
                 newVal = { $set: { name: updated.name, img: image, type: updated.type, address: updated.address, phone: updated.phone, bio: updated.bio } };
             else
-                newVal = { $set: { name: updated.name, img: image, type: updated.type, address: updated.address, phone: updated.phone, bio: updated.bio, tickets: user.tickets } };
-            db.collection("users").updateOne({ "_id": user._id }, newVal, function (err, data) {
+                newVal = { $set: { name: updated.name, img: image, type: updated.type, address: updated.address, phone: updated.phone, bio: updated.bio, tickets: updated.tickets } };
+            db.collection("users").updateOne({ _id: updated._id }, newVal, function (err, data) {
                 if (err || data.matchedCount == 0)
                     return reject(err);
                 return resolve(data);
@@ -60,7 +71,7 @@ module.exports = {
             var db = util.getDb();
             db.collection("users").find({ "$text": { "$search": searchStr } }).toArray(function (err, data) {
                 if (err) {
-                    log(err);
+                    log.error(err);
                     return reject(err);
                 }
                 return resolve(data);

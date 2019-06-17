@@ -71,8 +71,13 @@ passport.use(new GoogleStrategy({
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        storageModule.createUser(profile.emails[0].value, profile.displayName, photo, profile.provider).then(function (data) {
-            done(null, data);
+        storageModule.createUser(profile.emails[0].value, profile.displayName, null, photo, profile.provider).then(function (data) {
+            if (!data || Object.keys(data).length == 0) {
+                log.error("user doesnt' exist");
+                done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
+            }
+            else
+                done(null, data);
         }).otherwise(function (err) {
             done(err);
         });
@@ -193,13 +198,13 @@ app.get('/ticket', isAuthenticated, function (req, res) {
 
 app.post('/ticket', isAuthenticated, function (req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('form'))
+        res.status(400).end("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
-        storageModule.createTicket(req.body.citName, req.body.citEmail, req.body.orgName, req.body.orgEmail, req.body.startDate, req.body.endDate, req.body.TDescr, req.body.type).then(function (data) {
+        storageModule.createTicket(req.body.form.citName, req.body.form.citEmail, req.body.form.orgName, req.body.form.orgEmail, req.body.form.startDate, req.body.form.endDate, req.body.form.TDescr, req.body.form.type).then(function (data) {
             res.end(JSON.stringify(data));
         }).otherwise(function (err) {
-            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+            res.status(500).end("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
         });
     }
 });
@@ -209,13 +214,16 @@ app.get('/editProfile', isAuthenticated, function (req, res) {
 });
 
 app.post('/editProfile', isAuthenticated, function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('user') || req.user.length <= 0)
-        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
-    storageModule.updateUser(req.body, req.user[0]).then(function (data) {
-        res.send("Successfully edited");
-    }).otherwise(function (err) {
-        res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
-    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('form'))
+        res.status(400).end("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.updateUser(req.body.form).then(function (data) {
+            res.end("Successfully edited");
+        }).otherwise(function (err) {
+            res.status(500).end("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
 });
 
 app.get('/getCurrUser', isAuthenticated, function (req, res) {
