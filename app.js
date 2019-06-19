@@ -198,7 +198,7 @@ app.get('/ticket', isAuthenticated, function (req, res) {
 
 app.post('/ticket', isAuthenticated, function (req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    if (!req.hasOwnProperty('body') || !req.hasOwnProperty('form'))
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('form'))
         res.status(400).end("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
         storageModule.createTicket(req.body.form.citName, req.body.form.citEmail, req.body.form.orgName, req.body.form.orgEmail, req.body.form.startDate, req.body.form.endDate, req.body.form.TDescr, req.body.form.type).then(function (data) {

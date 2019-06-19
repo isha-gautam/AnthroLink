@@ -46,7 +46,7 @@
     <div class="container">
         <div class="col-lg-12 newTicket">
             <h5>Raise New Ticket</h5>
-            <div id="newTic" class="form-horizontal">
+            <form id="newTic" class="form-horizontal">
                 <div class="form-group">
                     <label class="col-lg-3 control-label">Citizen Name:</label>
                     <div class="col-lg-8">
@@ -74,25 +74,23 @@
                 <div class="form-group">
                     <label class="col-lg-3 control-label">Description</label>
                     <div class="col-lg-8">
-                        <input list="TDescr" name="TDescr" placeholder="TDescr" class="form-control" required>
-                        <datalist id="TDescr">
-                            <option value="Organic Waste Pickup">
-                            <option value="E-Waste Pickup">
-                            <option value="Monetary Donations">
-                            <option value="Non-Monetary Donations">
-                        </datalist>
+                        <select id="TDescr" name="TDescr" class="form-control" required>
+                            <option>Organic Waste Pickup</option>
+                            <option>E-Waste Pickup</option>
+                            <option>Monetary Donations</option>
+                            <option>Non-Monetary Donations</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-3 control-label">Type</label>
                     <div class="col-lg-8">
-                        <input list="type" name="type" placeholder="type" class="form-control" required>
-                        <datalist id="type">
-                            <option value="Once">
-                            <option value="Recurring (Daily)">
-                            <option value="Recurring (Weekly)">
-                            <option value="Recurring (Monthly)">
-                        </datalist>
+                        <select id="type" name="type" class="form-control" required>
+                            <option>Once</option>
+                            <option>Recurring (Daily)</option>
+                            <option>Recurring (Weekly)</option>
+                            <option>Recurring (Monthly)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -111,7 +109,7 @@
                         <input name="reset" type="reset" class="btn btn-default" value="Cancel">
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </body>

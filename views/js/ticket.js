@@ -54,8 +54,8 @@ $(document).ready(function () {
             "citEmail": $("#citEmail").val(),
             "orgName": $("#orgName").val(),
             "orgEmail": $("#orgEmail").val(),
-            "TDescr": $("#TDescr").val(),
-            "type": $("#type").val(),
+            "TDescr": $("#TDescr option:selected").text(),
+            "type": $("#type option:selected").text(),
             "startDate": $("#startDate").val(),
             "endDate": $("#endDate").val()
         };

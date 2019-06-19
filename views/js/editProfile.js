@@ -36,7 +36,7 @@ $(document).ready(function () {
         form = {
             "name": $("#name").val(),
             "_id": $("#email").val(),
-            "typeL": $("#typeL").val(),
+            "typeL": $("#typeL option:selected").text(),
             "address": $("#address").val(),
             "phone": $("#phone").val(),
             "bio": $("#bio").val(),
