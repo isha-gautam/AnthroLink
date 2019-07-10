@@ -23,10 +23,22 @@ module.exports = {
     createUser: function (...args) {
         return storageModule.createUser(...args);
     },
-    updateUser: function (...args) {
-        return storageModule.createUser(...args);
+    checkUser: function (...args) {
+        return storageModule.checkUser(...args);
     },
-    findOrg: function (...args) {
-        return storageModule.findOrg(...args);
+    updateUser: function (...args) {
+        return storageModule.updateUser(...args);
+    },
+    fetchUser: function (...args) {
+        return storageModule.fetchUser(...args);
+    },
+    createTicket: function (...args) {
+        return storageModule.createTicket(...args);
+    },
+    searchTicket:function(...args){
+        return storageModule.searchTicket(...args);
+    },
+    updateTicketStat: function (...args) {
+        return storageModule.updateTicketStat(...args);
     }
 };

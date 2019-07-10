@@ -12,24 +12,27 @@ var session = require('express-session');
 var IP, mode, PORT;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
+var path = require('path');
+require('winston');
+var log = require('./src/log.js');
 
 // Check https enable or not
 if (config.hasOwnProperty('https')) {
     var credentials = { key: config.https.key, cert: config.https.cert };
     Server = https.createServer(credentials, app);
-    console.log('App starting with HTTPS enabled');
+    log.info('App starting with HTTPS enabled');
     mode = "https";
 }
 else if (config.hasOwnProperty('http')) {
     Server = http.createServer(app);
-    console.log('App starting with HTTP enabled');
+    log.info('App starting with HTTP enabled');
     mode = "http";
 }
 else
     return process.exit(1);
 
 if (!config.hasOwnProperty('GoogleApi') || !config.GoogleApi.hasOwnProperty('client_Id') || !config.GoogleApi.hasOwnProperty('client_Secret')) {
-    console.log('Incomplete information');
+    log.error('Incomplete information');
     return process.exit(1);
 }
 
@@ -37,7 +40,7 @@ IP = config.hasOwnProperty('IP') ? config.IP : '127.0.0.1';
 PORT = config.hasOwnProperty('PORT') ? config.PORT : (process.env.PORT || 8080);
 
 if (!storageModule.init(config)) {
-    console.log('Cannot connect to DB');
+    log.error('Cannot connect to DB');
     return process.exit(1);
 }
 
@@ -49,7 +52,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "login.html");
+    res.redirect('/login');
 });
 
 passport.use(new GoogleStrategy({
@@ -61,44 +64,60 @@ passport.use(new GoogleStrategy({
         if (!accessToken || !profile || !profile.hasOwnProperty("id") ||
             !profile.hasOwnProperty("displayName") || !profile.hasOwnProperty("emails") ||
             !profile.hasOwnProperty("photos") || !profile.hasOwnProperty("provider"))
-            return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } }, null);
+            return done({ 'err': { "msg": "Incorrect data received from Google", "code": "" } });
         var photo = null;
         if (profile.photos.length > 0)
             photo = profile.photos[0].value;
         var email = null;
         if (profile.emails.length > 0)
             email = profile.emails[0].value;
-        storageModule.createUser(profile.id, profile.displayName, email, null, photo, profile.provider).then(function (data) {
-            done(null, data);
+        storageModule.createUser(profile.emails[0].value, profile.displayName, null, photo, profile.provider).then(function (data) {
+            if (!data || Object.keys(data).length == 0) {
+                log.error("user doesnt' exist");
+                done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
+            }
+            else
+                done(null, data);
         }).otherwise(function (err) {
-            done(err, null);
+            done(err);
         });
     }
 ));
 
 passport.use(new LocalStrategy({
+    passReqToCallBack: true,
     usernameField: 'email',
     passwordField: 'password'
 }, function (email, password, done) {
     if (!email || !password)
-        return done({ 'err': { "msg": "Incomplete data", "code": "" } }, null);
-    storageModule.checkUser(email, 'local').then(function (data) {
-        if (Object.key(data).length == 0)
-            done({ 'err': { "msg": "This user does not exist", "code": "" } }, null);
+        return done({ 'err': { "msg": "Incomplete data", "code": "" } });
+    storageModule.checkUser(email, password).then(function (data) {
+        if (!data || Object.keys(data).length == 0) {
+            log.error("user doesnt' exist");
+            done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
+        }
         else
             done(null, data);
     }).otherwise(function (err) {
-        done(err, null);
+        done(err);
     });
-}
-));
+}));
 
-passport.serializeUser(function (user, cb) {
-    cb(null, user);
+passport.serializeUser(function (user, done) {
+    done(null, user);
 });
 
-passport.deserializeUser(function (obj, cb) {
-    cb(null, obj);
+passport.deserializeUser(function (obj, done) {
+    storageModule.checkUser(obj[0]._id).then(function (data) {
+        if (!data || Object.keys(data).length == 0) {
+            log.error("user doesnt' exist");
+            done(null, false, { 'err': { "msg": "Wrong email id or password", "code": "" } });
+        }
+        else
+            done(null, data);
+    }).otherwise(function (err) {
+        done(err);
+    });
 });
 
 app.get('/auth/google', passport.authenticate('google', {
@@ -108,81 +127,171 @@ app.get('/auth/google', passport.authenticate('google', {
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/error' }),
     function (req, res) {
-        res.redirect('/dashboard');
+        res.redirect('/editProfile');
     }
 );
 
 app.get('/login', function (req, res) {
-    res.redirect('/');
+    res.sendFile(path.join(__dirname, "/views/html/", "login.html"));
 });
 
-app.post('/login', function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('name'))
-        console.log("error logging in");
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/error'
+}));
 
-    if (req.body.name == 'login-submit')
-        passport.authenticate('local', {
-            successRedirect: '/dashboard',
-            failureRedirect: '/error',
-            failureFlash: true
-        })
+app.post('/register', function (req, res) {
+    var ReqBody;
+    if (!req.hasOwnProperty('body'))
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
     else {
-        storageModule.checkUser(email, 'local').then(function (data) {
-            if (Object.key(data).length == 0) {
-                storageModule.createUser(null, req.body.name, req.body.email, req.body.password, null, 'local').then(function (data) {
-                    res.redirect('/dashboard');
-                }).otherwise(function (err) {
-                    res.redirect('/login');
-                });
-            }
+        ReqBody = JSON.parse(JSON.stringify(req.body));
+        var img;
+        if (ReqBody.type == "Citizen")
+            img = "https://img.icons8.com/cotton/64/000000/gender-neutral-user.png";
+        else
+            img = "https://img.icons8.com/metro/52/000000/organization.png";
+        storageModule.createUser(ReqBody.email, ReqBody.name, ReqBody.password, img, 'local', ReqBody.type).then(function (data) {
+            res.redirect('/login');
         }).otherwise(function (err) {
-            done(err, null);
+            log.error("User already exists. Please login with another email");
+            res.redirect('/login');
         });
     }
 });
 
-app.get('/dashboard', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "dashboard.html");
+app.get('/dashboard', isAuthenticated, function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/html/", "dashboard.html"));
 });
 
-app.get('/search', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "search.html");
+app.get('/search', isAuthenticated, function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/html/", "search.html"));
 });
 
-app.post('/search', function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('search'))
-        console.log("error getting data");
-    storageModule.findOrg(req.body.search.location).then(function (data) {
-        res.send(data);
-    }).otherwise(function (err) {
-        res.send("No search results");
-    })
-})
-
-app.get('/editProfile', function (req, res) {
-    res.sendFile(__dirname + "/views/html/" + "editProfile.html");
+app.post('/search', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('searchStr'))
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax."); else {
+        storageModule.fetchUser(req.body.searchStr).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+        }).otherwise(function (err) {
+            res.end("No search results");
+        });
+    }
 });
 
-app.post('/editProfile', function (req, res) {
-    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('name'))
-        console.log("error getting data");
-    storageModule.updateUser(json.stringify(req.body)).then(function (data) {
-        console.log("Succesfully edited!")
-    }).otherwise(function (err) {
-        console.log("Error updating! Please try again later!")
-    });
-    res.redirect('/search');
-})
+app.get('/otherProfile', isAuthenticated, function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/html/", "otherProfile.html"));
+});
 
-app.get('/logout', function (req, res) {
+app.post('/otherProfile', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('othPro'))
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        res.redirect("/ticket");
+    }
+});
+
+app.get('/ticket', isAuthenticated, function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/html/", "ticket.html"));
+});
+
+app.post('/ticket', isAuthenticated, function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('form'))
+        res.status(400).end("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.createTicket(req.body.form.citName, req.body.form.citEmail, req.body.form.orgName, req.body.form.orgEmail, req.body.form.startDate, req.body.form.endDate, req.body.form.TDescr, req.body.form.type).then(function (data) {
+            res.end(JSON.stringify(data));
+        }).otherwise(function (err) {
+            res.status(500).end("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
+});
+
+app.get('/editProfile', isAuthenticated, function (req, res) {
+    res.sendFile(path.join(__dirname, "/views/html/", "editProfile.html"));
+});
+
+app.post('/editProfile', isAuthenticated, function (req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('form'))
+        res.status(400).end("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.updateUser(req.body.form).then(function (data) {
+            res.end("Successfully edited");
+        }).otherwise(function (err) {
+            res.status(500).end("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
+});
+
+app.get('/getCurrUser', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('user') || req.user.length <= 0)
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(req.user[0]));
+    }
+});
+
+app.get('/othPro', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.query.hasOwnProperty('othPro'))
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.checkUser(req.query.othPro).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data[0]));
+        }).otherwise(function (err) {
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
+});
+
+app.get('/getTicks', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || req.body.length < 0)
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.searchTicket(req.user[0]._id).then(function (data) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+        }).otherwise(function (err) {
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
+});
+
+app.post('/updateStatus', isAuthenticated, function (req, res) {
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('stat'))
+        res.status(400).send("Bad request. The request could not be understood by the server due to malformed syntax.");
+    else {
+        storageModule.updateTicketStat(req.body.stat.id, req.body.stat.status).then(function (data) {
+            log.info("done")
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end("success");
+        }).otherwise(function (err) {
+            res.status(500).send("Internal Server error. The server encountered an unexpected condition which prevented it from fulfilling the request.");
+        });
+    }
+});
+
+app.get('/logout', isAuthenticated, function (req, res) {
     req.logout();
-    res.redirect('/login');
+    req.session.destroy(function (err) {
+        res.redirect('/');
+    });
 });
 
 app.get('/error', function (req, res) {
     res.redirect('/login');
 });
 
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated() || req.hasOwnProperty('user'))
+        return next();
+    res.redirect('/');
+};
+
 Server.listen(PORT, IP, () => {
-    console.log('Listening to port ' + PORT);
+    log.info('Listening to port ' + PORT);
 });

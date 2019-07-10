@@ -1,49 +1,59 @@
 function init() {
-    var currUser;
     $.ajax({
-        url: 'http://localhost:8080/',
+        url: '/getCurrUser',
         type: 'GET',
-        dataType: 'application/json',
-        complete: function (data) {
-            alert(data)
-        },
+        dataType: 'json',
         success: function (data) {
-            currUser = JSON.parse(data);
-            document.getElementById('img').src = currUser.img;
-            document.getElementById('name').value = currUser.name;
-            document.getElementById('email').value = currUser.email;
-            document.getElementById('type').value = currUser.type;
-            if (!currUser.hasOwnProperty('phone'))
-                document.getElementById('phone').value = currUser.phone;
-            if (!currUser.hasOwnProperty('address'))
-                document.getElementById('address').value = currUser.address;
+            if (!data)
+                alert("Cannot get current user details. Please try to login again.")
+            else {
+                if (data.hasOwnProperty('img'))
+                    document.getElementById('img').src = data.img;
+                if (data.name != null)
+                    document.getElementById('name').value = data.name;
+                if (data._id != null)
+                    document.getElementById('email').value = data._id;
+                if (data.type == null)
+                    $('#typeL').html("<select id='type' name='type' class='form-control' required><option>Not specified yet</option><option>Citizen</option><option>Organisation</option></select>");
+                else
+                    $('#typeL').html("<div name='type' id='type' class='form-control' readonly>" + data.type + "</div>");
+                if (data.hasOwnProperty('phone'))
+                    document.getElementById('phone').value = data.phone;
+                if (data.hasOwnProperty('address'))
+                    document.getElementById('address').value = data.address;
+                if (data.hasOwnProperty('bio'))
+                    document.getElementById('bio').value = data.bio;
+            }
+        }, error: function (xhr) {
+            alert("An error occured: " + xhr.status + " " + xhr.statusText);
         }
     })
 }
 
-(function () {
-    function toJSONString(form) {
-        var obj = {};
-        var elements = form.querySelectorAll("input");
-        for (var i = 0; i < elements.length; ++i) {
-            var element = elements[i];
-            var name = element.id;
-            var value = element.value;
-            if (name && value.length != 0) {
-                obj[name] = value;
+$(document).ready(function () {
+    $("#submit").click(function (e) {
+        e.preventDefault();
+        form = {
+            "name": $("#name").val(),
+            "_id": $("#email").val(),
+            "typeL": $("#typeL option:selected").text(),
+            "address": $("#address").val(),
+            "phone": $("#phone").val(),
+            "bio": $("#bio").val(),
+        };
+        $.ajax({
+            url: '/editProfile',
+            type: 'POST',
+            dataType: 'text',
+            data: { form: form },
+            success: function (data) {
+                alert(data);
+            }, error: function (xhr) {
+                alert("An error occured: " + xhr.status + " " + xhr.statusText);
             }
-        }
-        console.log(obj);
-        return JSON.stringify(obj);
-    }
+        });
+    })
+});
 
-    document.addEventListener("DOMContentLoaded", function () {
-        var form = document.getElementById("edit-profile");
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            var updatedUser = toJSONString(this);
-            //add code to update user in db
-        }, false);
-    });
 
-})();
+

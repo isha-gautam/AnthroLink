@@ -9,7 +9,6 @@
     <script src="../vendor/jquery-3.3.1.min.js"></script>
     <script src="../vendor/popper.min.js"></script>
     <script src="../vendor/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-    <script src="../js/search.js"></script>
 </head>
 
 <body>
@@ -33,34 +32,61 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item" href="editProfile">Edit Profile</a>
-                        <a class="dropdown-item" href="login">Logout</a>
+                        <a class="dropdown-item" href="logout">Logout</a>
                     </div>
                 </li>
             </ul>
         </div>
     </nav>
     <div id="dashboard" class="banner">
-        <div class="overlay"></div>
-        <div class="banner-content">
-            <div class="container">
-                <div class="col-sm-12">
-                    <form id="search" method="post" action="../../app.js" class="card card-sm" role="form">
-                        <div class="card-body row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-search h4 text-body"></i>
+        <div class="overlay">
+            <div class="banner-content">
+                <div class="container">
+                    <div class="col-sm-12">
+                        <div id="form" class="form row" name="form">
+                            <div class="card-body row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-search h4 text-body"></i>
+                                </div>
+                                <div class="col">
+                                    <input name="searchStr" id="searchStr"
+                                        class="form-control form-control-lg form-control-borderless" type="search"
+                                        placeholder="Search by location, keywords, name, etc">
+                                </div>
+                                <div class="col-auto">
+                                    <button id="submit" name="submit" class="btn btn-lg btn-success"
+                                        type="submit">Search</button>
+                                </div>
                             </div>
-                            <div class="col">
-                                <input name="location" id="location"
-                                    class="form-control form-control-lg form-control-borderless" type="search"
-                                    placeholder="Search by location">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-lg btn-success" type="submit">Search</button>
-                            </div>
-                    </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="col-sm-10 align-items-center">
+                        <table class="table table-bordered table-hover" id="tab_logic" style="float:center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        #
+                                    </th>
+                                    <th class="text-center">
+                                        Name
+                                    </th>
+                                    <th class="text-center">
+                                        Type
+                                    </th>
+                                    <th class="text-center">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='addr0'></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
+    <script src="../js/search.js"></script>
 </body>

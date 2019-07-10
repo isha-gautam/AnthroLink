@@ -112,8 +112,12 @@ body{
   font-size: 15px;
   letter-spacing: 0.5px;
   line-height: 1.5;
-  padding-top: 5%;
+  margin-top: 5%;
   padding-bottom: 5%;
+}
+
+#loginPage{
+  margin-top: 0;
 }
 
 a,i,.fa,.btn,
@@ -172,13 +176,17 @@ a:focus,.transition, #back-to-top:hover {
   overflow: auto;
 }
 
-#descr{
-  height: 100%;
+.marginRow{
+  margin:0px !important; 
+}
+
+#bio{
+  height: 70%;
   width: 100%;
   border-style: inset;
   border-color: #4885ed;
-  padding: 1%;
-  margin: 5%;
+  /* padding: 1%; */
+  /* margin: 5%; */
   overflow: auto;
 }
 
@@ -233,4 +241,7 @@ a:focus,.transition, #back-to-top:hover {
   padding: 20px;
   background: #fff;
   min-height: 460px;
+}
+.table-sortable tbody tr {
+  cursor: move;
 }

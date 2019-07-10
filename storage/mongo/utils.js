@@ -16,6 +16,14 @@ module.exports = {
           return reject(err);
         else {
           mydb = client.db('AnthroLinkDB');
+          mydb.createCollection("users", function (err, data) {
+            if (err)
+              return reject(err);
+          });
+          mydb.collection("users").createIndex({ name: "text", email: "text", address: "text", description: "text" }, function (err, name) {
+            if (err)
+              return reject(err);
+          });
           return resolve();
         }
       });
