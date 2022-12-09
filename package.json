@@ -9,7 +9,7 @@
   "author": "isha-gautam",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-session": "^1.16.1",
     "mongodb": "^3.2.2",
     "passport": "^0.4.0",
